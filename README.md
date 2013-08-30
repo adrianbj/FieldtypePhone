@@ -38,7 +38,7 @@ The parts of the phone number can be used in selectors like:
 2. In the admin control panel, go to Modules. At the bottom of the
 screen, click the "Check for New Modules" button.
 
-3. Now scroll to the FieldtypePhone module and click "Install". The required InputfieldPhone will get installed automatic.
+3. Now scroll to the FieldtypePhone module and click "Install". The required InputfieldPhone will get installed automatically.
 
 4. Create a new Field with the new "Phone" Fieldtype.
 
