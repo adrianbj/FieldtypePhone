@@ -1,0 +1,140 @@
+<?php
+
+/**
+ * ProcessWire Phone Inputfieldtype
+ * by Adrian Jones with code from "Soma" Philipp Urlich's Phone Fieldtype module
+ *
+ * ProcessWire 2.x
+ * Copyright (C) 2010 by Ryan Cramer
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ *
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ *
+ */
+
+class InputfieldPhone extends Inputfield {
+
+    public static function getModuleInfo() {
+        return array(
+            'title' => __('Phone Inputfield', __FILE__), // Module Title
+            'summary' => __('Simple Phone input field.', __FILE__), // Module Summary
+            'version' => 103,
+            'author' => 'Soma',
+            'requires' => array("FieldtypePhone")
+        );
+    }
+
+    /**
+     * Construct the Inputfield, setting defaults for all properties
+     *
+     */
+    public function __construct() {
+        $this->set('input_suffix','');
+        $this->set('input_width', 100);
+        parent::__construct();
+    }
+
+    /**
+     * Per the Module interface, init() is called when the system is ready for API usage
+     *
+     */
+    public function init() {
+        return parent::init();
+    }
+
+    /**
+     * Return the completed output of this Inputfield, ready for insertion in an XHTML form
+     *
+     * @return string
+     *
+     */
+    public function ___render() {
+
+        $out = '';
+        $value = $this->attr('value') ? $this->attr('value') : new Phone();
+
+        $label_country = $this->_("Country Code");
+        $label_area_code = $this->_("Area Code");
+        $label_number = $this->_("Number");
+        $label_extension = $this->_("Extension");
+
+        $out .= "<div class='phone_col'>";
+        $out .= "<label>{$label_country}: <input type='number' min='0' style='width:{$this->input_width}px' name='{$this->name}_country' id='Inputfield_{$this->name}_country' value='{$value->country}'/></label>";
+        $out .= "</div>";
+
+        $out .= "<div class='phone_col'>";
+        $out .= "<label>{$label_area_code}: <input type='number' min='0' style='width:{$this->input_width}px' name='{$this->name}_area_code' id='Inputfield_{$this->name}_area_code' value='{$value->area_code}'/></label>";
+        $out .= "</div>";
+
+        $out .= "<div class='phone_col'>";
+        $out .= "<label>{$label_number}: <input type='number' min='0' style='width:{$this->input_width}px' name='{$this->name}_number' id='Inputfield_{$this->name}_number' value='{$value->number}'/></label>";
+        $out .= "</div>";
+
+        $out .= "<div class='phone_col'>";
+        $out .= "<label>{$label_extension}: <input type='number' min='0' style='width:{$this->input_width}px' name='{$this->name}_extension' id='Inputfield_{$this->name}_extension' value='{$value->extension}'/></label>";
+        $out .= "</div>";
+
+        return $out;
+    }
+
+    /**
+     * Process the input from the given WireInputData (usually $input->get or $input->post), load and clean the value for use in this Inputfield.
+     *
+     * @param WireInputData $input
+     * @return $this
+     *
+     */
+    public function ___processInput(WireInputData $input) {
+
+        $name = $this->attr('name');
+        $value = $this->attr('value');
+
+        $dim_names = array(
+                'country' => $name . "_country",
+                'area_code' => $name . "_area_code",
+                'number' => $name . "_number",
+                'extension' => $name . "_extension"
+            );
+
+        // loop all inputs and set them if changed
+        foreach($dim_names as $key => $name) {
+            if(isset($input->$name)) {
+                if($value->$key != $input->$name) {
+                    if(!is_numeric($input->$name) && !empty($input->$name)) {
+                        // in case the input isn't numeric show an error
+                        $this->error($this->_("Field only accepts integer (int) values"));
+                    } else {
+                        $value->set($key, (int) $input->$name);
+                        $this->trackChange('value');
+                    }
+
+                }
+            }
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * Get any custom configuration fields for this Inputfield
+     *
+     * @return InputfieldWrapper
+     *
+     */
+    public function ___getConfigInputfields() {
+        $inputfields = parent::___getConfigInputfields();
+
+        $f = $this->modules->get('InputfieldInteger');
+        $f->attr('name', 'input_width');
+        $f->label = 'Input width';
+        $f->attr('value', $this->input_width ? $this->input_width : 100 );
+        $f->attr('size', 10);
+        $f->description = 'Width of the inputs in pixels.';
+        $inputfields->append($f);
+
+        return $inputfields;
+    }
+
+}
