@@ -19,8 +19,8 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__), // Module Title
             'summary' => __('Simple Phone input field.', __FILE__), // Module Summary
-            'version' => 103,
-            'author' => 'Soma',
+            'version' => 101,
+            'author' => 'Adrian',
             'requires' => array("FieldtypePhone")
         );
     }
@@ -103,9 +103,9 @@ class InputfieldPhone extends Inputfield {
                 if($value->$key != $input->$name) {
                     if(!is_numeric($input->$name) && !empty($input->$name)) {
                         // in case the input isn't numeric show an error
-                        $this->error($this->_("Field only accepts integer (int) values"));
+                        $this->error($this->_("Field only accepts numeric values"));
                     } else {
-                        $value->set($key, (int) $input->$name);
+                        $value->set($key, wire('sanitizer')->text($input->$name));
                         $this->trackChange('value');
                     }
 
@@ -126,7 +126,7 @@ class InputfieldPhone extends Inputfield {
     public function ___getConfigInputfields() {
         $inputfields = parent::___getConfigInputfields();
 
-        $f = $this->modules->get('InputfieldInteger');
+        $f = $this->modules->get('InputfieldText');
         $f->attr('name', 'input_width');
         $f->label = 'Input width';
         $f->attr('value', $this->input_width ? $this->input_width : 100 );
