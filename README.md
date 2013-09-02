@@ -54,8 +54,9 @@ There is a field settings for the width of the inputs in pixels.
 ##Custom formatting options
 
 In the field's details tab you can choose from predefined formats, or create custom formats using syntax like this:
-
+```
 {+<phoneCountry> }{(<phoneAreaCode>) }{<phoneNumber,0,3>-}{<phoneNumber,3,4>}{ x<phoneExtension>}
+```
 
 which generates: +1 (123) 456-7890 x123
 Each component is surrounded by { }
@@ -64,8 +65,9 @@ Two comma separated numbers after the component name are used to get certain par
 Anything outside the < > is used directly: +,-,(,),x, spaces, etc - whatever every you want to use.
 
 There are lots of complicated rules around numbers changing when dialed from different locations. A simple example is for Australia. When dialing from within Australia, area codes start with a 0, but when dialing from another country, the 0 must be omitted. You can write a simple format to handle this. The following truncates the first number from an Australian two digit area code:
+```
 {+<phoneCountry> }{(<phoneAreaCode,1,1>) }{<phoneNumber,0,4> }{ <phoneNumber,4,4>}{ x<phoneExtension>}
-
+```
 which generates: +1 (7) 1234 5678 x123 even though the full "07" is stored in the area code field.
 
 
