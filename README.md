@@ -14,6 +14,8 @@ Alternate styled options are:
 echo $page->fieldname->formattedNumberNoExt: //eg. +1 (123) 456-7890
 echo $page->fieldname->formattedNumberNoCtry: //eg. (123) 456-7890 x123
 echo $page->fieldname->formattedNumberNoCtryNoExt: //eg. (123) 456-7890
+
+echo $page->fieldname->unformattedNumber: //eg. 11234567890123
 echo $page->fieldname->unformattedNumberNoExt: //eg. 11234567890
 echo $page->fieldname->unformattedNumberNoCtry: //eg. 1234567890123
 echo $page->fieldname->unformattedNumberNoCtryNoExt: //eg. 1234567890
