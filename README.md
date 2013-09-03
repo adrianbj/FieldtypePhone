@@ -61,9 +61,13 @@ In the field's details tab you can choose from predefined formats, or create cus
 ```
 
 which generates: +1 (123) 456-7890 x123
+
 Each component is surrounded by { }
+
 The names of the component parts are surrounded by < >
+
 Two comma separated numbers after the component name are used to get certain parts of the number using php's substr function, allowing for complete flexibility.
+
 Anything outside the < > is used directly: +,-,(,),x, spaces, etc - whatever every you want to use.
 
 There are lots of complicated rules around numbers changing when dialed from different locations. A simple example is for Australia. When dialing from within Australia, area codes start with a 0, but when dialing from another country, the 0 must be omitted. You can write a simple format to handle this. The following truncates the first number from an Australian two digit area code:
