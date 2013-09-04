@@ -86,6 +86,10 @@ And the modules directory:
 http://modules.processwire.com/modules/fieldtype-phone/
 
 
+##Support
+http://processwire.com/talk/topic/4388-phone-number-fieldtype/
+
+
 ##To Do
 
 Need to increase the number of pre-defined formats. There seem to be so many options and no real standards, so I thought rather than create a huge list of options that no-one will use, I thought I'd wait and get you guys to contribute them as you need them. Either post your formats here, or send me a PR on github and I'll add them.
