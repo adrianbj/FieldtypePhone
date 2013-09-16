@@ -2,9 +2,9 @@
 
 /**
  * ProcessWire Phone Fieldtype
- * by Adrian Jones with code from "Soma" Philipp Urlich's Dimension Fieldtype module
+ * by Adrian Jones with code from "Soma" Philipp Urlich's Dimensions Fieldtype module and Ryan's core FieldtypeDatetime module
  *
- * Field that stores 4 numeric values for country/area code/number/extension.
+ * Field that stores 4 numeric values for country/area code/number/extension and allows for multiple formatting options.
  *
  * ProcessWire 2.x
  * Copyright (C) 2010 by Ryan Cramer
@@ -15,38 +15,42 @@
  *
  */
 
-class FieldtypePhone extends Fieldtype {
+class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
 
 
     public static function getModuleInfo() {
         return array(
             'title' => __('Phone Fieldtype', __FILE__), // Module Title
-            'summary' => __('Field that stores 4 numeric values for country, area code, number, extension.', __FILE__), // Module Summary
-            'version' => 101,
-            'author' => 'Adrian',
+            'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
+            'version' => 103,
+            'author' => 'Adrian Jones',
+            'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone'
         );
     }
 
+    protected static $configDefaults = array(
+
+        // global
+        "example_country" => 1,
+        "example_area_code" => 123,
+        "example_number" => 4567890,
+        "example_extension" => 321,
+        "output_format" => "",
+        "output_format_options" => "{+[phoneCountry] }{([phoneAreaCode]) }{[phoneNumber,0,3]-}{[phoneNumber,3,4]}{ x[phoneExtension]} /* Standard North America: +1 (111) 111-1111 x111 */
+{+[phoneCountry] }{([phoneAreaCode]) }{[phoneNumber]}{ x[phoneExtension]} /* Alternate North America: +1 (111) 1111111 x111 */
+{+[phoneCountry]-}{[phoneAreaCode]-}{[phoneNumber,0,3]-}{[phoneNumber,3,4]}{ x[phoneExtension]} /* Alternate North America: +1-111-111-1111 x111 */
+{+[phoneCountry]-}{[phoneAreaCode]-}{[phoneNumber]}{ x[phoneExtension]} /* Alternate North America: +1-111-1111111 x111 */
+{([phoneAreaCode,0,2]) }{[phoneNumber,0,4] }{ [phoneNumber,4,4]}{ x[phoneExtension]} /* Standard Australia without country code and with leading zero for area code: (01) 1111 1111 x111 */
+{+[phoneCountry] }{([phoneAreaCode,1,1]) }{[phoneNumber,0,4] }{ [phoneNumber,4,4]}{ x[phoneExtension]} /* International Australia with country code and without leading zero for area code: +1 (1) 1111 1111 x111 */"
+    );
+
 
     /**
-     * Date formats in date() format
+     * Data as used by the get/set functions
      *
      */
-    static protected $phoneNumberFormats = array(
-
-        // North America
-        '{+<phoneCountry> }{(<phoneAreaCode>) }{<phoneNumber,0,3>-}{<phoneNumber,3,4>}{ x<phoneExtension>}',     // +1 (123) 456-7890 x123
-        '{+<phoneCountry> }{(<phoneAreaCode>) }{<phoneNumber,0,3>}{<phoneNumber,3,4>}{ x<phoneExtension>}',     // +1 (123) 4567890 x123
-        '{+<phoneCountry>-}{<phoneAreaCode>-}{<phoneNumber,0,3>-}{<phoneNumber,3,4>}{ x<phoneExtension>}',     // +1-123-456-7890 x123
-        '{+<phoneCountry>-}{<phoneAreaCode>-}{<phoneNumber,0,3>-}{<phoneNumber,3,4>}{ x<phoneExtension>}',     // +1-123-4567890 x123
-
-        //Australia
-        '{+<phoneCountry> }{(<phoneAreaCode,0,2>) }{<phoneNumber,0,4> }{ <phoneNumber,4,4>}{ x<phoneExtension>}',     // +1 12 4567 8901 x123
-
-
-
-    );
+    protected $data = array();
 
 
     /**
@@ -54,15 +58,19 @@ class FieldtypePhone extends Fieldtype {
      *
      */
     public function ___formatValue(Page $page, Field $field, $value) {
-        $value->formattedNumber = $this->formatPhone($value->country, $value->area_code, $value->number, $value->extension, $field->phoneOutputFormat);
-        $value->formattedNumberNoCtryNoExt = $this->formatPhone(null, $value->area_code, $value->number, null, $field->phoneOutputFormat);
-        $value->formattedNumberNoCtry = $this->formatPhone(null, $value->area_code, $value->number, $value->extension, $field->phoneOutputFormat);
-        $value->formattedNumberNoExt = $this->formatPhone($value->country, $value->area_code, $value->number, null, $field->phoneOutputFormat);
+
+        $output_format = $value->output_format ? $value->output_format : $this->data["output_format"];
+
+        $value->formattedNumber = $this->formatPhone($value->country, $value->area_code, $value->number, $value->extension, $output_format);
+        $value->formattedNumberNoCtryNoExt = $this->formatPhone(null, $value->area_code, $value->number, null, $output_format);
+        $value->formattedNumberNoCtry = $this->formatPhone(null, $value->area_code, $value->number, $value->extension, $output_format);
+        $value->formattedNumberNoExt = $this->formatPhone($value->country, $value->area_code, $value->number, null, $output_format);
 
         $value->unformattedNumberNoCtryNoExt = ($value->area_code ? $value->area_code : null) . ($value->number ? $value->number : null);
         $value->unformattedNumberNoCtry = ($value->area_code ? $value->area_code : null) . ($value->number ? $value->number : null) . ($value->extension ? $value->extension : null);
         $value->unformattedNumberNoExt = ($value->country ? $value->country : null) . ($value->area_code ? $value->area_code : null) . ($value->number ? $value->number : null);
         $value->unformattedNumber = $value->unformattedNumberNoExt . ($value->extension ? $value->extension : null);
+
         return $value;
     }
 
@@ -118,7 +126,8 @@ class FieldtypePhone extends Fieldtype {
         if($value->isChanged('country')
                 || $value->isChanged('area_code')
                 || $value->isChanged('number')
-                || $value->isChanged('extension')) {
+                || $value->isChanged('extension')
+                || $value->isChanged('output_format')) {
             $page->trackChange($field->name);
         }
 
@@ -135,10 +144,11 @@ class FieldtypePhone extends Fieldtype {
         $dim = $this->getBlankValue($page, $field);
 
         // populate the dim
-        $dim->country = wire('sanitizer')->text($value['data']);
-        $dim->area_code = wire('sanitizer')->text($value['data_area_code']);
-        $dim->number = wire('sanitizer')->text($value['data_number']);
-        $dim->extension = wire('sanitizer')->text($value['data_extension']);
+        if($value['data']) $dim->country = wire('sanitizer')->text($value['data']);
+        if($value['data_area_code']) $dim->area_code = wire('sanitizer')->text($value['data_area_code']);
+        if($value['data_number']) $dim->number = wire('sanitizer')->text($value['data_number']);
+        if($value['data_extension']) $dim->extension = wire('sanitizer')->text($value['data_extension']);
+        if($value['data_output_format']) $dim->output_format = wire('sanitizer')->text($value['data_output_format']);
 
         return $dim;
     }
@@ -157,7 +167,8 @@ class FieldtypePhone extends Fieldtype {
             'data' => wire('sanitizer')->text($value->country),
             'data_area_code' => wire('sanitizer')->text($value->area_code),
             'data_number' => wire('sanitizer')->text($value->number),
-            'data_extension' => wire('sanitizer')->text($value->extension)
+            'data_extension' => wire('sanitizer')->text($value->extension),
+            'data_output_format' => wire('sanitizer')->text($value->output_format)
             );
 
         return $sleepValue;
@@ -176,10 +187,12 @@ class FieldtypePhone extends Fieldtype {
         $schema['data_area_code'] = 'char(15) NOT NULL';
         $schema['data_number'] = 'char(15) NOT NULL';
         $schema['data_extension'] = 'char(15) NOT NULL';
+        $schema['data_output_format'] = 'varchar(255) NOT NULL';
         // key for data will already be added from the parent
-        $schema['keys']['data_area_code'] = 'KEY data_height(data_area_code)';
-        $schema['keys']['data_number'] = 'KEY data_depth(data_number)';
-        $schema['keys']['data_extension'] = 'KEY data_volume(data_extension)';
+        $schema['keys']['data_area_code'] = 'KEY data_area_code(data_area_code)';
+        $schema['keys']['data_number'] = 'KEY data_number(data_number)';
+        $schema['keys']['data_extension'] = 'KEY data_extension(data_extension)';
+        $schema['keys']['data_output_format'] = 'KEY data_output_format(data_output_format)';
         return $schema;
     }
 
@@ -192,43 +205,91 @@ class FieldtypePhone extends Fieldtype {
      * @return InputfieldWrapper
      *
      */
-    public function ___getConfigInputfields(Field $field) {
-        $inputfields = parent::___getConfigInputfields($field);
+    public static function getModuleConfigInputfields(array $data) {
 
-        $f = $this->modules->get('InputfieldSelect');
-        $f->attr('name', '_phoneOutputFormat');
-        $f->label = $this->_('Phone Output Format');
-        $f->description = $this->_('Select the format to be used when outputting phone numbers with this field.');
-        $f->addOption('', $this->_('None'));
-        $phoneCountry = 1;
-        $phoneAreaCode = 123;
-        $phoneNumber = 45678901;
-        $phoneExtension = 123;
-        foreach(self::$phoneNumberFormats as $format) {
-            $phoneNumberFormatted = self::formatPhone($phoneCountry, $phoneAreaCode, $phoneNumber, $phoneExtension, $format);
-            $f->addOption($format, $phoneNumberFormatted);
-            if(strpos($field->phoneOutputFormat, $format) !== false) $f->attr('value', $format);
+        $modules = wire('modules');
+        $config = wire('config');
+
+        $modules->addHookBefore('saveModuleConfigData', null, 'InputfieldPageName_saveModuleConfigData');
+
+        foreach(self::$configDefaults as $key => $value) {
+            if(!isset($data[$key]) || $data[$key]=='' || $data[$key]=='~') $data[$key] = $value;
         }
-        $f->attr('onchange', "$('#Inputfield_phoneOutputFormat').val($(this).val());");
+
+        $fieldtypePhone = new FieldtypePhone();
+        $data = array_map( array( $fieldtypePhone, 'removeTilde'), $data);
+
+
+        $inputfields = new InputfieldWrapper();
+
+        $f = $modules->get('InputfieldSelect');
+        $f->attr('name', 'output_format');
+        $f->label = __('Phone Output Format');
+        $f->description = __("Select the format to be used when outputting phone numbers.\n\nYou can define new formats for this dropdown select in the options field below.");
+        $f->addOption('', __('None'));
+
+        foreach(explode("\n",$data["output_format_options"]) as $format){
+            $format_stripped = trim(preg_replace('!/\*.*?\*/!s', '', $format));
+            $phoneNumberFormatted = self::formatPhone($data["example_country"], $data["example_area_code"], $data["example_number"], $data["example_extension"], $format);
+            $f->addOption($format_stripped, $phoneNumberFormatted . str_replace ($format_stripped, '', $format));
+            if(strpos($data["output_format"], $format_stripped) !== false) $f->attr('value', $format_stripped);
+        }
+
         $inputfields->add($f);
 
-        $f = $this->modules->get("InputfieldText");
-        $f->attr('name', 'phoneOutputFormat');
-        $f->attr('value', $field->phoneOutputFormat);
-        $f->attr('size', 200);
-        $f->label = $this->_('Phone Output Format Code');
-        $f->description = $this->_('The phone number will be output according to the format below. This is automatically built from the selection above, but you may change it as needed to suit your needs.');
-        $f->notes = $this->_('');
+
+        $f = $modules->get("InputfieldTextarea");
+        $f->attr('name', 'output_format_options');
+        $f->attr('value', $data["output_format_options"]);
+        $f->attr('rows', 10);
+        $f->label = __('Phone Output Format Options');
+        $f->description = __("Edit the defined formats here.\nOnce saved, they will be available for the default Phone Output Format selector on this page, as well as the Format Override selector when entering data for phone number fields.\n\nOne format per line.\n\nEach component of the phone number is surrounded by { }\nThe names of the component parts are surrounded by [ ]\nTwo optional comma separated numbers after the component name are used to get certain parts of the number using php's substr function, allowing for complete flexibility.\nAnything outside the [ ] is used directly: +,-,(,),x, spaces, etc - whatever you want to use.\n\nOptional descriptions can be included at the end of each line between /* */ tags.\n\nYou can reset to the default options by emptying this field and saving.\n\nPlease send me a PR on Github, or post to the support forum any new formats you create that you think others would find useful.");
         $f->collapsed = Inputfield::collapsedYes;
-        if($this->languages) {
-            $f->useLanguages = true;
-            foreach($this->languages as $language) {
-                if($language->isDefault()) continue;
-                $f->set("value$language", (string) $field->get('phoneOutputFormat' . $language));
-            }
-        }
-        $f->set("value", (string) $field->get('phoneOutputFormat'));
         $inputfields->add($f);
+
+
+        $fieldset = $modules->get("InputfieldFieldset");
+        $fieldset->attr('id', 'example_number_options');
+        $fieldset->label = "Example Number Options";
+        $fieldset->collapsed = Inputfield::collapsedYes;
+        $inputfields->add($fieldset);
+
+
+        $f = $modules->get("InputfieldText");
+        $f->attr('name', 'example_country');
+        $f->attr('value', $data["example_country"]);
+        $f->attr('size', 20);
+        $f->label = __('Example Country Code');
+        $f->description = __('The number(s) you want to use for the country code in the format example.');
+        $fieldset->add($f);
+
+
+        $f = $modules->get("InputfieldText");
+        $f->attr('name', 'example_area_code');
+        $f->attr('value', $data["example_area_code"]);
+        $f->attr('size', 20);
+        $f->label = __('Example Area Code');
+        $f->description = __('The number(s) you want to use for the area code in the format example.');
+        $fieldset->add($f);
+
+
+        $f = $modules->get("InputfieldText");
+        $f->attr('name', 'example_number');
+        $f->attr('value', $data["example_number"]);
+        $f->attr('size', 20);
+        $f->label = __('Example Phone Number');
+        $f->description = __('The numbers you want to use for the phone number in the format example.');
+        $fieldset->add($f);
+
+
+        $f = $modules->get("InputfieldText");
+        $f->attr('name', 'example_extension');
+        $f->attr('value', $data["example_extension"]);
+        $f->attr('size', 20);
+        $f->label = __('Example Extension');
+        $f->description = __('The number(s) you want to use for the extension in the format example.');
+        $fieldset->add($f);
+
 
         return $inputfields;
     }
@@ -255,10 +316,10 @@ class FieldtypePhone extends Fieldtype {
         $finalvalue = '';
         foreach ($components[1] as $component) {
 
-            $prefix = strstr($component, '<', TRUE);
-            $suffix = str_replace('>','',strstr($component, '>'));
+            $prefix = strstr($component, '[', TRUE);
+            $suffix = str_replace(']','',strstr($component, ']'));
 
-            $component = str_replace(array($prefix, $suffix, '<', '>'), null, $component);
+            $component = str_replace(array($prefix, $suffix, '[', ']'), null, $component);
 
             if (strcspn($component, '0123456789') != strlen($component)){
                     $component_name = strstr($component, ',', TRUE);
@@ -278,8 +339,33 @@ class FieldtypePhone extends Fieldtype {
 
     }
 
+    /**
+     * Helper function to remove any ~ from the format example numbers
+     *
+     */
+    public static function removeTilde($value) {
+        return str_replace('~', '', $value);
+    }
+
 }
 
+
+/**
+ * Helper function to prepend a ~ to the format example numbers to prevent wireEncodeJSON from stripping leading zeros
+ *
+ */
+function InputfieldPageName_saveModuleConfigData(HookEvent $event) {
+    $arguments = $event->arguments;
+    if($arguments[0] != 'FieldtypePhone') return;
+    $data = $arguments[1];
+    foreach ($data as $key => $value) {
+        $data[$key] = strpos($key,'example_') !== false  ? '~' . $value : $value;
+    }
+    $name = 'replacements';
+    if(!is_array($data[$name])) $data[$name] = InputfieldPageName::replacementStringToArray($data[$name]);
+    $arguments[1] = $data;
+    $event->arguments = $arguments;
+}
 
 
 /**
@@ -293,6 +379,7 @@ class Phone extends WireData {
         $this->set('area_code', null);
         $this->set('number', null);
         $this->set('extension', null);
+        $this->set('output_format', null);
     }
 
     public function set($key, $value) {
@@ -310,6 +397,10 @@ class Phone extends WireData {
 
     public function get($key) {
         return parent::get($key);
+    }
+
+    public function __toString() {
+        return (string)$this->formattedNumber;
     }
 
 }

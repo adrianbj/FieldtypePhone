@@ -6,8 +6,10 @@ A new fieldtype to enter phone numbers with 4 integer values for country, area c
 ##StyledOutput
 
 The most common usage option will be:
-echo $page->fieldname->formattedNumber //eg. +1 (123) 456-7890 x123
+echo $page->fieldname //eg. +1 (123) 456-7890 x123
 This provides a fully formatted phone number, based on the output format chosen from the details tab of the field's settings.
+
+This is a shortcut that produces the same output as: echo $page->fieldname->formattedNumber //eg. +1 (123) 456-7890 x123
 
 Alternate styled options are:
 ```
@@ -52,27 +54,31 @@ $pages->find("phone.area_code=123");
 
 There is a field settings for the width of the inputs in pixels.
 
+You can also choose whether to display the country and extension fields for input. Off by default.
+
+There is an additional checkbox that determines whether there is an option to override the default format option on a per entry basis, which will be useful when styling phone numbers from different countries on the one website. Off by default.
+
 
 ##Custom formatting options
 
-In the field's details tab you can choose from predefined formats, or create custom formats using syntax like this:
+On the module's configuration page you can choose from predefined formats, or create custom formats using syntax like this:
 ```
-{+<phoneCountry> }{(<phoneAreaCode>) }{<phoneNumber,0,3>-}{<phoneNumber,3,4>}{ x<phoneExtension>}
+{+[phoneCountry] }{([phoneAreaCode]) }{[phoneNumber,0,3]-}{[phoneNumber,3,4]}{ x[phoneExtension]}
 ```
 
 which generates: +1 (123) 456-7890 x123
 
 Each component is surrounded by { }
 
-The names of the component parts are surrounded by < >
+The names of the component parts are surrounded by [ ]
 
 Two comma separated numbers after the component name are used to get certain parts of the number using php's substr function, allowing for complete flexibility.
 
-Anything outside the < > is used directly: +,-,(,),x, spaces, etc - whatever every you want to use.
+Anything outside the [ ] is used directly: +,-,(,),x, spaces, etc - whatever every you want to use.
 
 There are lots of complicated rules around numbers changing when dialed from different locations. A simple example is for Australia. When dialing from within Australia, area codes start with a 0, but when dialing from another country, the 0 must be omitted. You can write a simple format to handle this. The following truncates the first number from an Australian two digit area code:
 ```
-{+<phoneCountry> }{(<phoneAreaCode,1,1>) }{<phoneNumber,0,4> }{ <phoneNumber,4,4>}{ x<phoneExtension>}
+{+[phoneCountry] }{([phoneAreaCode,1,1]) }{[phoneNumber,0,4] }{ [phoneNumber,4,4]}{ x[phoneExtension]}
 ```
 which generates: +1 (7) 1234 5678 x123 even though the full "07" is stored in the area code field.
 
@@ -103,9 +109,9 @@ In the admin control panel, go to Modules. At the bottom of the screen, click th
 
 Now scroll to the FieldtypePhone module and click "Install". The required InputfieldPhone will get installed automatically.
 
-Create a new Field with the new "Phone" Fieldtype.
+Choose a Phone Output Format from the module's configuration page. You can also set the numbers that will be used in the formatted example which may be helpful in certain regions to give a more realistic example.
 
-Choose a Phone Output Format from the details tab.
+Create a new Field with the new "Phone" Fieldtype.
 
 ##Acknowledgments
 
