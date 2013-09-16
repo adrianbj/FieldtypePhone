@@ -6,10 +6,15 @@ A new fieldtype to enter phone numbers with 4 integer values for country, area c
 ##StyledOutput
 
 The most common usage option will be:
+```
 echo $page->fieldname //eg. +1 (123) 456-7890 x123
+```
 This provides a fully formatted phone number, based on the output format chosen from the details tab of the field's settings.
 
-This is a shortcut that produces the same output as: echo $page->fieldname->formattedNumber //eg. +1 (123) 456-7890 x123
+This is a shortcut that produces the same output as:
+```
+echo $page->fieldname->formattedNumber //eg. +1 (123) 456-7890 x123
+```
 
 Alternate styled options are:
 ```
