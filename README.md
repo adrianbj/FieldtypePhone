@@ -9,7 +9,7 @@ The most common usage option will be:
 ```
 echo $page->fieldname //eg. +1 (123) 456-7890 x123
 ```
-This provides a fully formatted phone number, based on the output format chosen from the details tab of the field's settings.
+This provides a fully formatted phone number, based on the output format chosen from module's configuration page, or with the format override option (if enabled), when entering a phone number on a page.
 
 This is a shortcut that produces the same output as:
 ```
