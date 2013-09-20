@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone Fieldtype', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 103,
+            'version' => 104,
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone'
@@ -210,7 +210,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         $modules = wire('modules');
         $config = wire('config');
 
-        $modules->addHookBefore('saveModuleConfigData', null, 'InputfieldPageName_saveModuleConfigData');
+        $modules->addHookBefore('saveModuleConfigData', null, 'InputfieldPhone_saveModuleConfigData');
 
         foreach(self::$configDefaults as $key => $value) {
             if(!isset($data[$key]) || $data[$key]=='' || $data[$key]=='~') $data[$key] = $value;
@@ -354,7 +354,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
  * Helper function to prepend a ~ to the format example numbers to prevent wireEncodeJSON from stripping leading zeros
  *
  */
-function InputfieldPageName_saveModuleConfigData(HookEvent $event) {
+function InputfieldPhone_saveModuleConfigData(HookEvent $event) {
     $arguments = $event->arguments;
     if($arguments[0] != 'FieldtypePhone') return;
     $data = $arguments[1];
