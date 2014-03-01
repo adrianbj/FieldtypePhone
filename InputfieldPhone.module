@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 103,
+            'version' => 104,
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'requires' => array("FieldtypePhone")
@@ -136,7 +136,6 @@ class InputfieldPhone extends Inputfield {
         // loop all inputs and set them if changed
         foreach($dim_names as $key => $name) {
             if(isset($input->$name)) {
-                error_log($input->$name);
                 if($value->$key != $input->$name) {
                     if(!is_numeric($input->$name) && !empty($input->$name) && $key != 'output_format') {
                         // in case the input isn't numeric show an error
