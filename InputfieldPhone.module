@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 104,
+            'version' => 105,
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'requires' => array("FieldtypePhone")
@@ -173,24 +173,21 @@ class InputfieldPhone extends Inputfield {
         $f = $this->modules->get('InputfieldCheckbox');
         $f->attr('name', 'input_country');
         $f->label = 'Country Code';
-        $f->attr('value', $this->input_country ? $this->input_country : 0 );
-        $f->attr('checked', $this->input_country == '1' ? 'checked' : '' );
+        $f->attr('checked', $this->input_country ? 'checked' : '' );
         $f->description = 'Whether to ask for country code when entering phone numbers.';
         $inputfields->append($f);
 
         $f = $this->modules->get('InputfieldCheckbox');
         $f->attr('name', 'input_extension');
         $f->label = 'Extension';
-        $f->attr('value', $this->input_extension ? $this->input_extension : 0 );
-        $f->attr('checked', $this->input_extension == '1' ? 'checked' : '' );
+        $f->attr('checked', $this->input_extension ? 'checked' : '' );
         $f->description = 'Whether to ask for extension when entering phone numbers.';
         $inputfields->append($f);
 
         $f = $this->modules->get('InputfieldCheckbox');
         $f->attr('name', 'input_output_format_override');
         $f->label = 'Output Format Override';
-        $f->attr('value', $this->input_output_format_override ? $this->input_output_format_override : 0 );
-        $f->attr('checked', $this->input_output_format_override == '1' ? 'checked' : '' );
+        $f->attr('checked', $this->input_output_format_override ? 'checked' : '' );
         $f->description = 'Whether to give option to override selected output format when entering phone numbers.';
         $inputfields->append($f);
 
