@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 107,
+            'version' => 108,
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon'     => 'phone',
@@ -193,11 +193,6 @@ class InputfieldPhone extends Inputfield {
         $inputfields->append($f);
 
         return $inputfields;
-    }
-
-    public function ___install() {
-        // save default config data on install
-        $this->modules->saveModuleConfigData($this->modules->get("FieldtypePhone"), FieldtypePhone::$configDefaults);
     }
 
 }

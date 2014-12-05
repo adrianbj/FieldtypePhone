@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone Fieldtype', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 107,
+            'version' => 108,
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -30,7 +30,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         );
     }
 
-    public static $configDefaults = array(
+    protected static $configDefaults = array(
 
         // global
         "example_country" => 1,
@@ -346,6 +346,12 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
      */
     public static function removeTilde($value) {
         return str_replace('~', '', $value);
+    }
+
+
+    public function ___install() {
+        // save default config data on install
+        $this->modules->saveModuleConfigData($this, self::$configDefaults);
     }
 
 }
