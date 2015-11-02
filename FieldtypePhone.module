@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone Fieldtype', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 108,
+            'version' => 109,
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -392,9 +392,8 @@ class Phone extends WireData {
     public function set($key, $value) {
 
         if($key == 'country' || $key == 'area_code' || $key == 'number' || $key == 'extension') {
-            // if value isn't numeric, don't change the value if already
-            // one set, else set it to 0 and throw an exception so it can be seen on API usage
-            if(!is_numeric($value) && !is_null($value)) {
+            // if value isn't numeric set it to blank and throw an exception so it can be seen on API usage
+            if(!is_numeric($value) && !is_null($value) && $value != '') {
                 $value = $this->$key ? $this->$key : '';
                 throw new WireException("Phone Object only accepts numbers");
             }
