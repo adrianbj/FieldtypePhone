@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone Fieldtype', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 109,
+            'version' => 110,
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -93,8 +93,8 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
      *
      */
     public function getInputfield(Page $page, Field $field) {
-        $dim = $this->modules->get('InputfieldPhone');
-        return $dim;
+        $pn = $this->modules->get('InputfieldPhone');
+        return $pn;
     }
 
     /**
@@ -141,17 +141,17 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
      */
     public function ___wakeupValue(Page $page, Field $field, $value) {
 
-        // get blank dim
-        $dim = $this->getBlankValue($page, $field);
+        // get blank phone number (pn)
+        $pn = $this->getBlankValue($page, $field);
 
-        // populate the dim
-        if($value['data']) $dim->country = wire('sanitizer')->text($value['data']);
-        if($value['data_area_code']) $dim->area_code = wire('sanitizer')->text($value['data_area_code']);
-        if($value['data_number']) $dim->number = wire('sanitizer')->text($value['data_number']);
-        if($value['data_extension']) $dim->extension = wire('sanitizer')->text($value['data_extension']);
-        if($value['data_output_format']) $dim->output_format = wire('sanitizer')->text($value['data_output_format']);
+        // populate the pn
+        if($value['data']) $pn->country = wire('sanitizer')->text($value['data']);
+        if($value['data_area_code']) $pn->area_code = wire('sanitizer')->text($value['data_area_code']);
+        if($value['data_number']) $pn->number = wire('sanitizer')->text($value['data_number']);
+        if($value['data_extension']) $pn->extension = wire('sanitizer')->text($value['data_extension']);
+        if($value['data_output_format']) $pn->output_format = wire('sanitizer')->text($value['data_output_format']);
 
-        return $dim;
+        return $pn;
     }
 
     /**
@@ -406,7 +406,9 @@ class Phone extends WireData {
     }
 
     public function __toString() {
-        return (string)$this->formattedNumber;
+        $number = (string)$this->formattedNumber ? (string)$this->formattedNumber : $this->data['number'];
+        if(!$number) $number = '';
+        return $number;
     }
 
 }
