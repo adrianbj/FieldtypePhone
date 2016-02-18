@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 110,
+            'version' => 111,
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon'     => 'phone',
@@ -73,21 +73,21 @@ class InputfieldPhone extends Inputfield {
 
         if($this->input_country == 1){
             $out .= "<div class='phone_col'>";
-            $out .= "<label>{$this->_("Country Code")}: <input type='number' min='0' style='width:{$this->input_width}px' name='{$this->name}_country' id='Inputfield_{$this->name}_country' value='{$value->country}'/></label>";
+            $out .= "<label>{$this->_("Country Code")}: <input type='text' pattern='[0-9]*' style='width:{$this->input_width}px' name='{$this->name}_country' id='Inputfield_{$this->name}_country' value='{$value->country}'/></label>";
             $out .= "</div>";
         }
 
         $out .= "<div class='phone_col'>";
-        $out .= "<label>{$this->_("Area Code")}: <input type='number' min='0' style='width:{$this->input_width}px' name='{$this->name}_area_code' id='Inputfield_{$this->name}_area_code' value='{$value->area_code}'/></label>";
+        $out .= "<label>{$this->_("Area Code")}: <input type='text' pattern='[0-9]*' style='width:{$this->input_width}px' name='{$this->name}_area_code' id='Inputfield_{$this->name}_area_code' value='{$value->area_code}'/></label>";
         $out .= "</div>";
 
         $out .= "<div class='phone_col'>";
-        $out .= "<label>{$this->_("Number")}: <input type='number' min='0' style='width:{$this->input_width}px' name='{$this->name}_number' id='Inputfield_{$this->name}_number' value='{$value->number}'/></label>";
+        $out .= "<label>{$this->_("Number")}: <input type='text' pattern='[0-9]*' style='width:{$this->input_width}px' name='{$this->name}_number' id='Inputfield_{$this->name}_number' value='{$value->number}'/></label>";
         $out .= "</div>";
 
         if($this->input_extension == 1){
             $out .= "<div class='phone_col'>";
-            $out .= "<label>{$this->_("Extension")}: <input type='number' min='0' style='width:{$this->input_width}px' name='{$this->name}_extension' id='Inputfield_{$this->name}_extension' value='{$value->extension}'/></label>";
+            $out .= "<label>{$this->_("Extension")}: <input type='text' pattern='[0-9]*' style='width:{$this->input_width}px' name='{$this->name}_extension' id='Inputfield_{$this->name}_extension' value='{$value->extension}'/></label>";
             $out .= "</div>";
         }
 
