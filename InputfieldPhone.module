@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 112,
+            'version' => 113,
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon'     => 'phone',
@@ -183,6 +183,19 @@ class InputfieldPhone extends Inputfield {
         $f->label = 'Extension';
         $f->attr('checked', $this->input_extension ? 'checked' : '' );
         $f->description = 'Whether to ask for extension when entering phone numbers.';
+        $inputfields->append($f);
+
+        $f = $this->modules->get('InputfieldSelect');
+        $f->attr('name', 'output_format');
+        $f->label = __('Phone Output Format');
+        $f->description = __("Select the format to be used when outputting phone numbers for this field.\n\nYou can define new formats for this dropdown select in the phone fieldtype module config settings.");
+        $f->addOption('', __('None'));
+        foreach(explode("\n",$this->output_format_options) as $format){
+            $format_stripped = trim(preg_replace('!/\*.*?\*/!s', '', $format));
+            $phoneNumberFormatted = FieldtypePhone::formatPhone($this->example_country, $this->example_area_code, $this->example_number, $this->example_extension, $format);
+            $f->addOption($format_stripped, $phoneNumberFormatted . str_replace ($format_stripped, '', $format));
+            if(strpos($this->output_format, $format_stripped) !== false) $f->attr('value', $format_stripped);
+        }
         $inputfields->append($f);
 
         $f = $this->modules->get('InputfieldCheckbox');

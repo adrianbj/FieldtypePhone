@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone Fieldtype', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 112,
+            'version' => 113,
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -60,7 +60,15 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
      */
     public function ___formatValue(Page $page, Field $field, $value) {
 
-        $output_format = $value->output_format ? $value->output_format : $this->data["output_format"];
+        if($value->output_format) {
+            $output_format = $value->output_format;
+        }
+        elseif($field->output_format) {
+            $output_format = $field->output_format;
+        }
+        else {
+            $output_format = $this->data["output_format"];
+        }
 
         $value->formattedNumber = $this->formatPhone($value->country, $value->area_code, $value->number, $value->extension, $output_format);
         $value->formattedNumberNoCtryNoExt = $this->formatPhone(null, $value->area_code, $value->number, null, $output_format);
@@ -228,14 +236,12 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         $f->label = __('Phone Output Format');
         $f->description = __("Select the format to be used when outputting phone numbers.\n\nYou can define new formats for this dropdown select in the options field below.");
         $f->addOption('', __('None'));
-
         foreach(explode("\n",$data["output_format_options"]) as $format){
             $format_stripped = trim(preg_replace('!/\*.*?\*/!s', '', $format));
             $phoneNumberFormatted = self::formatPhone($data["example_country"], $data["example_area_code"], $data["example_number"], $data["example_extension"], $format);
             $f->addOption($format_stripped, $phoneNumberFormatted . str_replace ($format_stripped, '', $format));
             if(strpos($data["output_format"], $format_stripped) !== false) $f->attr('value', $format_stripped);
         }
-
         $inputfields->add($f);
 
 
