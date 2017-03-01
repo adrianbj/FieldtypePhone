@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 113,
+            'version' => '1.2.0',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon'     => 'phone',
@@ -38,8 +38,8 @@ class InputfieldPhone extends Inputfield {
         $this->set('input_extension', 0);
         $this->set('input_output_format_override', 0);
 
-        $data = $this->modules->getModuleConfigData('FieldtypePhone');
-        $fieldtypePhone = new FieldtypePhone();
+        $data = $this->wire('modules')->getModuleConfigData('FieldtypePhone');
+        $fieldtypePhone = new \FieldtypePhone();
         $data = array_map( array( $fieldtypePhone, 'removeTilde'), $data);
 
         $this->set('output_format',$data["output_format"]);
@@ -97,7 +97,6 @@ class InputfieldPhone extends Inputfield {
             $out .= "<label>{$this->_("Format Override")}: <select name='{$this->name}_output_format' id='Inputfield_{$this->name}_output_format'>";
             $out .= '<option value="" ' . ($value->output_format == '' ? 'selected' : '') . '>No Override</option>';
 
-            //foreach(FieldtypePhone::$phoneNumberFormats as $format) {
             foreach(explode("\n",$this->output_format_options) as $format){
                 $format_stripped = trim(preg_replace('!/\*.*?\*/!s', '', $format));
                 $phoneNumberFormatted = FieldtypePhone::formatPhone($this->example_country, $this->example_area_code, $this->example_number, $this->example_extension, $format);
@@ -126,7 +125,7 @@ class InputfieldPhone extends Inputfield {
         $name = $this->attr('name');
         $value = $this->attr('value');
 
-        $dim_names = array(
+        $pn_names = array(
                 'country' => $name . "_country",
                 'area_code' => $name . "_area_code",
                 'number' => $name . "_number",
@@ -135,14 +134,14 @@ class InputfieldPhone extends Inputfield {
             );
 
         // loop all inputs and set them if changed
-        foreach($dim_names as $key => $name) {
+        foreach($pn_names as $key => $name) {
             if(isset($input->$name)) {
                 if($value->$key != $input->$name) {
                     if(!is_numeric($input->$name) && !empty($input->$name) && $key != 'output_format') {
                         // in case the input isn't numeric show an error
-                        $this->error($this->_("Field only accepts numeric values"));
+                        $this->wire()->error($this->_("Field only accepts numeric values"));
                     } else {
-                        $value->set($key, wire('sanitizer')->text($input->$name));
+                        $value->set($key, $this->wire('sanitizer')->digits($input->$name));
                         $this->trackChange('value');
                     }
 
@@ -163,7 +162,7 @@ class InputfieldPhone extends Inputfield {
     public function ___getConfigInputfields() {
         $inputfields = parent::___getConfigInputfields();
 
-        $f = $this->modules->get('InputfieldText');
+        $f = $this->wire('modules')->get('InputfieldText');
         $f->attr('name', 'input_width');
         $f->label = 'Input width';
         $f->attr('value', $this->input_width );
@@ -171,21 +170,21 @@ class InputfieldPhone extends Inputfield {
         $f->description = 'Width of the inputs in pixels.';
         $inputfields->append($f);
 
-        $f = $this->modules->get('InputfieldCheckbox');
+        $f = $this->wire('modules')->get('InputfieldCheckbox');
         $f->attr('name', 'input_country');
         $f->label = 'Country Code';
         $f->attr('checked', $this->input_country ? 'checked' : '' );
         $f->description = 'Whether to ask for country code when entering phone numbers.';
         $inputfields->append($f);
 
-        $f = $this->modules->get('InputfieldCheckbox');
+        $f = $this->wire('modules')->get('InputfieldCheckbox');
         $f->attr('name', 'input_extension');
         $f->label = 'Extension';
         $f->attr('checked', $this->input_extension ? 'checked' : '' );
         $f->description = 'Whether to ask for extension when entering phone numbers.';
         $inputfields->append($f);
 
-        $f = $this->modules->get('InputfieldSelect');
+        $f = $this->wire('modules')->get('InputfieldSelect');
         $f->attr('name', 'output_format');
         $f->label = __('Phone Output Format');
         $f->description = __("Select the format to be used when outputting phone numbers for this field.\n\nYou can define new formats for this dropdown select in the phone fieldtype module config settings.");
@@ -198,7 +197,7 @@ class InputfieldPhone extends Inputfield {
         }
         $inputfields->append($f);
 
-        $f = $this->modules->get('InputfieldCheckbox');
+        $f = $this->wire('modules')->get('InputfieldCheckbox');
         $f->attr('name', 'input_output_format_override');
         $f->label = 'Output Format Override';
         $f->attr('checked', $this->input_output_format_override ? 'checked' : '' );

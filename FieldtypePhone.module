@@ -20,12 +20,13 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
 
     public static function getModuleInfo() {
         return array(
-            'title' => __('Phone Fieldtype', __FILE__), // Module Title
+            'title' => __('Phone', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => 113,
+            'version' => '1.2.0',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
+            'requiredBy' => 'InputfieldPhone',
             'icon'     => 'phone'
         );
     }
@@ -101,7 +102,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
      *
      */
     public function getInputfield(Page $page, Field $field) {
-        $pn = $this->modules->get('InputfieldPhone');
+        $pn = $this->wire('modules')->get('InputfieldPhone');
         return $pn;
     }
 
@@ -153,11 +154,11 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         $pn = $this->getBlankValue($page, $field);
 
         // populate the pn
-        if($value['data']) $pn->country = wire('sanitizer')->text($value['data']);
-        if($value['data_area_code']) $pn->area_code = wire('sanitizer')->text($value['data_area_code']);
-        if($value['data_number']) $pn->number = wire('sanitizer')->text($value['data_number']);
-        if($value['data_extension']) $pn->extension = wire('sanitizer')->text($value['data_extension']);
-        if($value['data_output_format']) $pn->output_format = wire('sanitizer')->text($value['data_output_format']);
+        if(isset($value['data'])) $pn->country = $this->wire('sanitizer')->digits($value['data']);
+        if(isset($value['data_area_code'])) $pn->area_code = $this->wire('sanitizer')->digits($value['data_area_code']);
+        if(isset($value['data_number'])) $pn->number = $this->wire('sanitizer')->digits($value['data_number']);
+        if(isset($value['data_extension'])) $pn->extension = $this->wire('sanitizer')->digits($value['data_extension']);
+        if(isset($value['data_output_format'])) $pn->output_format = $this->wire('sanitizer')->digits($value['data_output_format']);
 
         return $pn;
     }
@@ -173,11 +174,11 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
             throw new WireException("Expecting an instance of Phone");
 
         $sleepValue = array(
-            'data' => wire('sanitizer')->text($value->country),
-            'data_area_code' => wire('sanitizer')->text($value->area_code),
-            'data_number' => wire('sanitizer')->text($value->number),
-            'data_extension' => wire('sanitizer')->text($value->extension),
-            'data_output_format' => wire('sanitizer')->text($value->output_format)
+            'data' => $this->wire('sanitizer')->digits($value->country),
+            'data_area_code' => $this->wire('sanitizer')->digits($value->area_code),
+            'data_number' => $this->wire('sanitizer')->digits($value->number),
+            'data_extension' => $this->wire('sanitizer')->digits($value->extension),
+            'data_output_format' => $this->wire('sanitizer')->digits($value->output_format)
             );
 
         return $sleepValue;
@@ -214,10 +215,10 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
      * @return InputfieldWrapper
      *
      */
-    public static function getModuleConfigInputfields(array $data) {
+    public function getModuleConfigInputfields(array $data) {
 
-        $modules = wire('modules');
-        $config = wire('config');
+        $modules = $this->wire('modules');
+        $config = $this->wire('config');
 
         $modules->addHookBefore('saveModuleConfigData', null, 'InputfieldPhone_saveModuleConfigData');
 
@@ -225,7 +226,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
             if(!isset($data[$key]) || $data[$key]=='' || $data[$key]=='~') $data[$key] = $value;
         }
 
-        $fieldtypePhone = new FieldtypePhone();
+        $fieldtypePhone = new \FieldtypePhone();
         $data = array_map( array( $fieldtypePhone, 'removeTilde'), $data);
 
 
@@ -357,7 +358,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
 
     public function ___install() {
         // save default config data on install
-        $this->modules->saveModuleConfigData($this, self::$configDefaults);
+        $this->wire('modules')->saveModuleConfigData($this, self::$configDefaults);
     }
 
 }
