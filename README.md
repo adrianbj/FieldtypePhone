@@ -1,9 +1,8 @@
-Phone Number Fieldtype
-======================
+# Phone Number Fieldtype
 
-A new fieldtype to enter phone numbers with 4 integer values for country, area code, number and extension and format the output based on predefined or custom options.
+A ProcessWire fieldtype to enter phone numbers with 4 integer values for country, area code, number and extension and format the output based on predefined or custom options.
 
-##StyledOutput
+## StyledOutput
 
 The most common usage option will be:
 ```
@@ -31,7 +30,7 @@ echo $page->fieldname->unformattedNumberNoCtryNoExt: //eg. 1234567890
 Of course the actual output is determined by the selected format output
 
 
-##Raw Output
+## Raw Output
 
 You can output the values for the component parts of the phone number like this:
 ```
@@ -41,21 +40,21 @@ echo $page->fieldname->number;
 echo $page->fieldname->extension;
 ```
 
-##Output for mobile compatibility
+## Output for mobile compatibility
 
 To get iOS and other mobile platforms to recognize numbers and be able to automatically dial them, use something like this:
 ```
 echo '<a href="tel:+'.$page->fieldname->unformattedNumberNoExt.'">'.$page->fieldname->formattedNumber.'</a>';
 ```
 
-##Selectors for searching
+## Selectors for searching
 
 The component parts can be used in selectors like this:
 ```
 $pages->find("phone.area_code=123");
 ```
 
-##Field Settings
+## Field Settings
 
 There is a field settings for the width of the inputs in pixels.
 
@@ -64,7 +63,7 @@ You can also choose whether to display the country and extension fields for inpu
 There is an additional checkbox that determines whether there is an option to override the default format option on a per entry basis, which will be useful when styling phone numbers from different countries on the one website. Off by default.
 
 
-##Custom formatting options
+## Custom formatting options
 
 On the module's configuration page you can choose from predefined formats, or create custom formats using syntax like this:
 ```
@@ -88,35 +87,21 @@ There are lots of complicated rules around numbers changing when dialed from dif
 which generates: +1 (7) 1234 5678 x123 even though the full "07" is stored in the area code field.
 
 
-##Where to get
+## Setup
 
-Available from github:
-https://github.com/adrianbj/FieldtypePhone
-
-And the modules directory:
-http://modules.processwire.com/modules/fieldtype-phone/
+* Choose a Phone Output Format from the module's configuration page. You can also set the numbers that will be used in the formatted example which may be helpful in certain regions to give a more realistic example.
+* Create a new Field with the new "Phone" Fieldtype.
 
 
-##Support
+## Support
+
 http://processwire.com/talk/topic/4388-phone-number-fieldtype/
 
 
-##To Do
+## To Do
 
 Need to increase the number of pre-defined formats. There seem to be so many options and no real standards, so I thought rather than create a huge list of options that no-one will use, I thought I'd wait and get you guys to contribute them as you need them. Either post your formats here, or send me a PR on github and I'll add them.
 
-
-##How to install
-
-Download and place the module folder named "FieldtypePhone" in: /site/modules/
-
-In the admin control panel, go to Modules. At the bottom of the screen, click the "Check for New Modules" button.
-
-Now scroll to the FieldtypePhone module and click "Install". The required InputfieldPhone will get installed automatically.
-
-Choose a Phone Output Format from the module's configuration page. You can also set the numbers that will be used in the formatted example which may be helpful in certain regions to give a more realistic example.
-
-Create a new Field with the new "Phone" Fieldtype.
 
 ##Acknowledgments
 

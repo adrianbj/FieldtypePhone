@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => '1.2.0',
+            'version' => '1.2.1',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon'     => 'phone',
@@ -69,7 +69,7 @@ class InputfieldPhone extends Inputfield {
 
         $out = '';
 
-        $value = $this->attr('value') ? $this->attr('value') : new Phone();
+        $value = $this->attr('value') ? $this->attr('value') : new \Phone();
 
         if($this->input_country == 1){
             $out .= "<div class='phone_col'>";
@@ -125,6 +125,8 @@ class InputfieldPhone extends Inputfield {
         $name = $this->attr('name');
         $value = $this->attr('value');
 
+        if(is_null($value)) $value = new \Phone;
+
         $pn_names = array(
                 'country' => $name . "_country",
                 'area_code' => $name . "_area_code",
@@ -142,13 +144,15 @@ class InputfieldPhone extends Inputfield {
                         $this->wire()->error($this->_("Field only accepts numeric values"));
                     } else {
                         $value->set($key, $this->wire('sanitizer')->digits($input->$name));
-                        $this->trackChange('value');
                     }
 
                 }
             }
         }
-
+        if($value != $this->attr('value')) {
+            $this->trackChange('value');
+            $this->setAttribute('value', FieldtypePhone::formatPhone($value->country, $value->area_code, $value->number, $value->extension, $this->output_format));
+        }
         return $this;
     }
 
