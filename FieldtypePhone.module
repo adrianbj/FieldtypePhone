@@ -6,7 +6,7 @@
  *
  * Field that stores 4 numeric values for country/area code/number/extension and allows for multiple formatting options.
  *
- * ProcessWire 2.x
+ * ProcessWire 3.x
  * Copyright (C) 2010 by Ryan Cramer
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
@@ -20,14 +20,14 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
 
     public static function getModuleInfo() {
         return array(
-            'title' => __('Phone', __FILE__), // Module Title
-            'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => '1.2.1',
+            'title' => __('Phone', __FILE__),
+            'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
+            'version' => '1.2.2',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
             'requiredBy' => 'InputfieldPhone',
-            'icon'     => 'phone'
+            'icon' => 'phone'
         );
     }
 
@@ -134,13 +134,12 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
 
         // report any changes to the field values
         if($value->isChanged('country')
-                || $value->isChanged('area_code')
-                || $value->isChanged('number')
-                || $value->isChanged('extension')
-                || $value->isChanged('output_format')) {
-            $page->trackChange($field->name);
+            || $value->isChanged('area_code')
+            || $value->isChanged('number')
+            || $value->isChanged('extension')
+            || $value->isChanged('output_format')) {
+                $page->trackChange($field->name);
         }
-
         return $value;
     }
 
@@ -179,7 +178,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
             'data_number' => $this->wire('sanitizer')->digits($value->number),
             'data_extension' => $this->wire('sanitizer')->digits($value->extension),
             'data_output_format' => $this->wire('sanitizer')->digits($value->output_format)
-            );
+        );
 
         return $sleepValue;
     }
@@ -229,14 +228,13 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         $fieldtypePhone = new \FieldtypePhone();
         $data = array_map( array( $fieldtypePhone, 'removeTilde'), $data);
 
-
         $inputfields = new InputfieldWrapper();
 
         $f = $modules->get('InputfieldSelect');
         $f->attr('name', 'output_format');
-        $f->label = __('Phone Output Format');
-        $f->description = __("Select the format to be used when outputting phone numbers.\n\nYou can define new formats for this dropdown select in the options field below.");
-        $f->addOption('', __('None'));
+        $f->label = __('Phone Output Format', __FILE__);
+        $f->description = __("Select the format to be used when outputting phone numbers.\n\nYou can define new formats for this dropdown select in the options field below.", __FILE__);
+        $f->addOption('', __('None', __FILE__));
         foreach(explode("\n",$data["output_format_options"]) as $format){
             $format_stripped = trim(preg_replace('!/\*.*?\*/!s', '', $format));
             $phoneNumberFormatted = self::formatPhone($data["example_country"], $data["example_area_code"], $data["example_number"], $data["example_extension"], $format);
@@ -245,59 +243,52 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         }
         $inputfields->add($f);
 
-
         $f = $modules->get("InputfieldTextarea");
         $f->attr('name', 'output_format_options');
         $f->attr('value', $data["output_format_options"]);
         $f->attr('rows', 10);
-        $f->label = __('Phone Output Format Options');
-        $f->description = __("Edit the defined formats here.\nOnce saved, they will be available for the default Phone Output Format selector on this page, as well as the Format Override selector when entering data for phone number fields.\n\nOne format per line.\n\nEach component of the phone number is surrounded by { }\nThe names of the component parts are surrounded by [ ]\nTwo optional comma separated numbers after the component name are used to get certain parts of the number using php's substr function, allowing for complete flexibility.\nAnything outside the [ ] is used directly: +,-,(,),x, spaces, etc - whatever you want to use.\n\nOptional descriptions can be included at the end of each line between /* */ tags.\n\nYou can reset to the default options by emptying this field and saving.\n\nPlease send me a PR on Github, or post to the support forum any new formats you create that you think others would find useful.");
+        $f->label = __('Phone Output Format Options', __FILE__);
+        $f->description = __("Edit the defined formats here.\nOnce saved, they will be available for the default Phone Output Format selector on this page, as well as the Format Override selector when entering data for phone number fields.\n\nOne format per line.\n\nEach component of the phone number is surrounded by { }\nThe names of the component parts are surrounded by [ ]\nTwo optional comma separated numbers after the component name are used to get certain parts of the number using php's substr function, allowing for complete flexibility.\nAnything outside the [ ] is used directly: +,-,(,),x, spaces, etc - whatever you want to use.\n\nOptional descriptions can be included at the end of each line between /* */ tags.\n\nYou can reset to the default options by emptying this field and saving.\n\nPlease send me a PR on Github, or post to the support forum any new formats you create that you think others would find useful.", __FILE__);
         $f->collapsed = Inputfield::collapsedYes;
         $inputfields->add($f);
 
-
         $fieldset = $modules->get("InputfieldFieldset");
         $fieldset->attr('id', 'example_number_options');
-        $fieldset->label = "Example Number Options";
+        $fieldset->label = __('Example Number Options', __FILE__);
         $fieldset->collapsed = Inputfield::collapsedYes;
         $inputfields->add($fieldset);
-
 
         $f = $modules->get("InputfieldText");
         $f->attr('name', 'example_country');
         $f->attr('value', $data["example_country"]);
         $f->attr('size', 20);
-        $f->label = __('Example Country Code');
-        $f->description = __('The number(s) you want to use for the country code in the format example.');
+        $f->label = __('Example Country Code', __FILE__);
+        $f->description = __('The number(s) you want to use for the country code in the format example.', __FILE__);
         $fieldset->add($f);
-
 
         $f = $modules->get("InputfieldText");
         $f->attr('name', 'example_area_code');
         $f->attr('value', $data["example_area_code"]);
         $f->attr('size', 20);
-        $f->label = __('Example Area Code');
-        $f->description = __('The number(s) you want to use for the area code in the format example.');
+        $f->label = __('Example Area Code', __FILE__);
+        $f->description = __('The number(s) you want to use for the area code in the format example.', __FILE__);
         $fieldset->add($f);
-
 
         $f = $modules->get("InputfieldText");
         $f->attr('name', 'example_number');
         $f->attr('value', $data["example_number"]);
         $f->attr('size', 20);
-        $f->label = __('Example Phone Number');
-        $f->description = __('The numbers you want to use for the phone number in the format example.');
+        $f->label = __('Example Phone Number', __FILE__);
+        $f->description = __('The numbers you want to use for the phone number in the format example.', __FILE__);
         $fieldset->add($f);
-
 
         $f = $modules->get("InputfieldText");
         $f->attr('name', 'example_extension');
         $f->attr('value', $data["example_extension"]);
         $f->attr('size', 20);
-        $f->label = __('Example Extension');
-        $f->description = __('The number(s) you want to use for the extension in the format example.');
+        $f->label = __('Example Extension', __FILE__);
+        $f->description = __('The number(s) you want to use for the extension in the format example.', __FILE__);
         $fieldset->add($f);
-
 
         return $inputfields;
     }
@@ -322,8 +313,8 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         $pattern = preg_match_all("/{(.*?)}/", $format, $components);
 
         $finalvalue = '';
-        foreach ($components[1] as $component) {
 
+        foreach ($components[1] as $component) {
             $prefix = strstr($component, '[', TRUE);
             $suffix = str_replace(']','',strstr($component, ']'));
 
@@ -340,11 +331,8 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
             }
 
             $finalvalue .= ($value != '' ? $prefix . $value . $suffix : null);
-
         }
-
         return $finalvalue;
-
     }
 
     /**

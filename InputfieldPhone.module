@@ -4,7 +4,7 @@
  * ProcessWire Phone Inputfieldtype
  * by Adrian Jones with code from "Soma" Philipp Urlich's Dimensions Fieldtype module and Ryan's core FieldtypeDatetime module
  *
- * ProcessWire 2.x
+ * ProcessWire 3.x
  * Copyright (C) 2010 by Ryan Cramer
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => '1.2.1',
+            'version' => '1.2.2',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon'     => 'phone',
@@ -107,7 +107,6 @@ class InputfieldPhone extends Inputfield {
             $out .= "</div>";
         }
 
-
         $out .= '<div style="clear:both">&nbsp;</div>';
 
         return $out;
@@ -128,12 +127,12 @@ class InputfieldPhone extends Inputfield {
         if(is_null($value)) $value = new \Phone;
 
         $pn_names = array(
-                'country' => $name . "_country",
-                'area_code' => $name . "_area_code",
-                'number' => $name . "_number",
-                'extension' => $name . "_extension",
-                'output_format' => $name . "_output_format"
-            );
+            'country' => $name . "_country",
+            'area_code' => $name . "_area_code",
+            'number' => $name . "_number",
+            'extension' => $name . "_extension",
+            'output_format' => $name . "_output_format"
+        );
 
         // loop all inputs and set them if changed
         foreach($pn_names as $key => $name) {
@@ -145,7 +144,6 @@ class InputfieldPhone extends Inputfield {
                     } else {
                         $value->set($key, $this->wire('sanitizer')->digits($input->$name));
                     }
-
                 }
             }
         }
@@ -168,31 +166,31 @@ class InputfieldPhone extends Inputfield {
 
         $f = $this->wire('modules')->get('InputfieldText');
         $f->attr('name', 'input_width');
-        $f->label = 'Input width';
+        $f->label = __('Input width', __FILE__);
         $f->attr('value', $this->input_width );
         $f->attr('size', 10);
-        $f->description = 'Width of the inputs in pixels.';
+        $f->description = __('Width of the inputs in pixels.', __FILE__);
         $inputfields->append($f);
 
         $f = $this->wire('modules')->get('InputfieldCheckbox');
         $f->attr('name', 'input_country');
-        $f->label = 'Country Code';
+        $f->label = __('Country Code', __FILE__);
         $f->attr('checked', $this->input_country ? 'checked' : '' );
-        $f->description = 'Whether to ask for country code when entering phone numbers.';
+        $f->description = __('Whether to ask for country code when entering phone numbers.', __FILE__);
         $inputfields->append($f);
 
         $f = $this->wire('modules')->get('InputfieldCheckbox');
         $f->attr('name', 'input_extension');
-        $f->label = 'Extension';
+        $f->label = __('Extension', __FILE__);
         $f->attr('checked', $this->input_extension ? 'checked' : '' );
-        $f->description = 'Whether to ask for extension when entering phone numbers.';
+        $f->description = _('Whether to ask for extension when entering phone numbers.', __FILE__);
         $inputfields->append($f);
 
         $f = $this->wire('modules')->get('InputfieldSelect');
         $f->attr('name', 'output_format');
-        $f->label = __('Phone Output Format');
-        $f->description = __("Select the format to be used when outputting phone numbers for this field.\n\nYou can define new formats for this dropdown select in the phone fieldtype module config settings.");
-        $f->addOption('', __('None'));
+        $f->label = __('Phone Output Format', __FILE__);
+        $f->description = __("Select the format to be used when outputting phone numbers for this field.\n\nYou can define new formats for this dropdown select in the phone fieldtype module config settings.", __FILE__);
+        $f->addOption('', __('None', __FILE__));
         foreach(explode("\n",$this->output_format_options) as $format){
             $format_stripped = trim(preg_replace('!/\*.*?\*/!s', '', $format));
             $phoneNumberFormatted = FieldtypePhone::formatPhone($this->example_country, $this->example_area_code, $this->example_number, $this->example_extension, $format);
@@ -203,9 +201,9 @@ class InputfieldPhone extends Inputfield {
 
         $f = $this->wire('modules')->get('InputfieldCheckbox');
         $f->attr('name', 'input_output_format_override');
-        $f->label = 'Output Format Override';
+        $f->label = __('Output Format Override', __FILE__);
         $f->attr('checked', $this->input_output_format_override ? 'checked' : '' );
-        $f->description = 'Whether to give option to override selected output format when entering phone numbers.';
+        $f->description = __('Whether to give option to override selected output format when entering phone numbers.', __FILE__);
         $inputfields->append($f);
 
         return $inputfields;
