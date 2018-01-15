@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '1.2.2',
+            'version' => '1.2.3',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -226,7 +226,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         }
 
         $fieldtypePhone = new \FieldtypePhone();
-        $data = array_map( array( $fieldtypePhone, 'removeTilde'), $data);
+        $data = array_map(array($fieldtypePhone, 'removeTilde'), $data);
 
         $inputfields = new InputfieldWrapper();
 

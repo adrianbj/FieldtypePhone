@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__), // Module Title
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__), // Module Summary
-            'version' => '1.2.2',
+            'version' => '1.2.3',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon'     => 'phone',
@@ -78,7 +78,7 @@ class InputfieldPhone extends Inputfield {
         }
 
         $out .= "<div class='phone_col'>";
-        $out .= "<label>{$this->_("Area Code")}: <input type='text' pattern='[0-9]*' style='width:{$this->input_width}px' name='{$this->name}_area_code' id='Inputfield_{$this->name}_area_code' value='{$value->area_code}'/></label>";
+        $out .= "<label>{$this->_("Area Code")}: <input type='text' style='width:{$this->input_width}px' name='{$this->name}_area_code' id='Inputfield_{$this->name}_area_code' value='{$value->area_code}'/></label>";
         $out .= "</div>";
 
         $out .= "<div class='phone_col'>";
@@ -183,7 +183,7 @@ class InputfieldPhone extends Inputfield {
         $f->attr('name', 'input_extension');
         $f->label = __('Extension', __FILE__);
         $f->attr('checked', $this->input_extension ? 'checked' : '' );
-        $f->description = _('Whether to ask for extension when entering phone numbers.', __FILE__);
+        $f->description = __('Whether to ask for extension when entering phone numbers.', __FILE__);
         $inputfields->append($f);
 
         $f = $this->wire('modules')->get('InputfieldSelect');
