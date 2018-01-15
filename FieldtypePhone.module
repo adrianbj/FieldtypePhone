@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '1.2.4',
+            'version' => '1.2.5',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -192,10 +192,10 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
     public function getDatabaseSchema(Field $field) {
 
         $schema = parent::getDatabaseSchema($field);
-        $schema['data'] = 'char(15) NOT NULL';
-        $schema['data_area_code'] = 'char(15) NOT NULL';
-        $schema['data_number'] = 'char(15) NOT NULL';
-        $schema['data_extension'] = 'char(15) NOT NULL';
+        $schema['data'] = 'varchar(15) NOT NULL';
+        $schema['data_area_code'] = 'varchar(15) NOT NULL';
+        $schema['data_number'] = 'varchar(15) NOT NULL';
+        $schema['data_extension'] = 'varchar(15) NOT NULL';
         $schema['data_output_format'] = 'varchar(255) NOT NULL';
         // key for data will already be added from the parent
         $schema['keys']['data_area_code'] = 'KEY data_area_code(data_area_code)';
