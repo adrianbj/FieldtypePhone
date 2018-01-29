@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '2.0.4',
+            'version' => '2.0.5',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon' => 'phone',
@@ -91,37 +91,36 @@ class InputfieldPhone extends Inputfield {
 
         $out = '';
 
-        $data = $this->hasField ?: $this;
         $value = $this->attr('value') ? $this->attr('value') : new \Phone();
 
-        if($data->country_input == 1) {
+        if($this->country_input == 1) {
             $out .= "<div class='phone_col'>";
-            $out .= "<label>{$data["country_input_name$lang"]}: <input type='text' pattern='[0-9]*' style='width:{$this->country_input_width}px' name='{$this->name}_country' id='Inputfield_{$this->name}_country' value='{$value->country}'/></label>";
+            $out .= "<label>".$this->{"country_input_name$lang"}.": <input type='text' pattern='[0-9]*' style='width:{$this->country_input_width}px' name='{$this->name}_country' id='Inputfield_{$this->name}_country' value='{$value->country}'/></label>";
             $out .= "</div>";
         }
 
         $out .= "<div class='phone_col'>";
-        $out .= "<label>{$data["area_code_input_name$lang"]}: <input type='text' pattern='[0-9]*' style='width:{$this->area_code_input_width}px' name='{$this->name}_area_code' id='Inputfield_{$this->name}_area_code' value='{$value->area_code}'/></label>";
+        $out .= "<label>".$this->{"area_code_input_name$lang"}.": <input type='text' pattern='[0-9]*' style='width:{$this->area_code_input_width}px' name='{$this->name}_area_code' id='Inputfield_{$this->name}_area_code' value='{$value->area_code}'/></label>";
         $out .= "</div>";
 
         $out .= "<div class='phone_col'>";
-        $out .= "<label>{$data["number_input_name$lang"]}: <input type='text' pattern='[0-9]*' style='width:{$this->number_input_width}px' name='{$this->name}_number' id='Inputfield_{$this->name}_number' value='{$value->number}'/></label>";
+        $out .= "<label>".$this->{"number_input_name$lang"}.": <input type='text' pattern='[0-9]*' style='width:{$this->number_input_width}px' name='{$this->name}_number' id='Inputfield_{$this->name}_number' value='{$value->number}'/></label>";
         $out .= "</div>";
 
-        if($data->extension_input == 1) {
+        if($this->extension_input == 1) {
             $out .= "<div class='phone_col'>";
-            $out .= "<label>{$data["extension_input_name$lang"]}: <input type='text' pattern='[0-9]*' style='width:{$this->extension_input_width}px' name='{$this->name}_extension' id='Inputfield_{$this->name}_extension' value='{$value->extension}'/></label>";
+            $out .= "<label>".$this->{"extension_input_name$lang"}.": <input type='text' pattern='[0-9]*' style='width:{$this->extension_input_width}px' name='{$this->name}_extension' id='Inputfield_{$this->name}_extension' value='{$value->extension}'/></label>";
             $out .= "</div>";
         }
 
-        if($data->output_format_override_input == 1) {
+        if($this->output_format_override_input == 1) {
 
             $out .= "<div class='phone_col'>";
             $out .= "<label>{$this->_("Format")}: <select name='{$this->name}_output_format' id='Inputfield_{$this->name}_output_format'>";
             $out .= '<option value="" ' . ($this->output_format == '' ? 'selected' : '') . '>No Override</option>';
             $this->fieldtypePhone = $this->wire('modules')->get('FieldtypePhone');
-            foreach($this->fieldtypePhone->buildOptions(explode("\n",$this->data["output_format_options"]), $this->data) as $option) {
-                $out .= '<option value="'.$option[0].'" ' . (($option[0] == $data->output_format) ? 'selected' : '') . '>'.$option[1].'</option>';
+            foreach($this->fieldtypePhone->buildOptions(explode("\n",$this->output_format_options), $this->data) as $option) {
+                $out .= '<option value="'.$option[0].'" ' . (($option[0] == $this->output_format) ? 'selected' : '') . '>'.$option[1].'</option>';
             }
             $out .= "</select></label>";
             $out .= "</div>";

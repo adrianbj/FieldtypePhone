@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '2.0.4',
+            'version' => '2.0.5',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -98,7 +98,7 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry] }{([phoneAreaCode,1
      */
     public function ___markupValue(Page $page, Field $field, $value = null, $property = '') {
         if(is_null($value)) return;
-        $output_format = $field->data["output_format"];
+        $output_format = isset($field->data["output_format"]) ? $field->data["output_format"] : $this->data["output_format"];
         $outputCode = $this->getFormatFromName($output_format);
         return $this->formatPhone($value->country, $value->area_code, $value->number, $value->extension, $outputCode);
     }
