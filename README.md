@@ -16,6 +16,7 @@ echo $page->fieldname->formattedNumber //eg. +1 (123) 456-7890 x123
 ```
 
 Alternate styled options are:
+
 ```
 echo $page->fieldname->formattedNumberNoExt: //eg. +1 (123) 456-7890
 echo $page->fieldname->formattedNumberNoCtry: //eg. (123) 456-7890 x123
@@ -27,12 +28,19 @@ echo $page->fieldname->unformattedNumberNoCtry: //eg. 1234567890123
 echo $page->fieldname->unformattedNumberNoCtryNoExt: //eg. 1234567890
 ```
 
-Of course the actual output is determined by the selected format output
+Of course the actual output is determined by the selected format output.
+
+You can also call any of the defined formats manually like this:
+
+```
+echo $page->fieldname->australiaWithCountryAreaCodeNoLeadingZero;
+```
 
 
 ## Raw Output
 
 You can output the values for the component parts of the phone number like this:
+
 ```
 echo $page->fieldname->country;
 echo $page->fieldname->area_code;
@@ -56,7 +64,7 @@ $pages->find("phone.area_code=123");
 
 ## Field Settings
 
-There is a field settings for the width of the inputs in pixels.
+There is a field settings for the width of each number component in pixels.
 
 You can also choose whether to display the country and extension fields for input. Off by default.
 
@@ -65,26 +73,24 @@ There is an additional checkbox that determines whether there is an option to ov
 
 ## Custom formatting options
 
-On the module's configuration page you can choose from predefined formats, or create custom formats using syntax like this:
+On the module's configuration page you can choose from predefined formats, or create custom formats using syntax like this with one format per line: `name | format | example numbers` eg.
 ```
-{+[phoneCountry]} {([phoneAreaCode])} {[phoneNumber,0,3]}-{[phoneNumber,3,4]} {x[phoneExtension]}
+australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode])} {[phoneNumber,0,3]}-{[phoneNumber,3,4]} {x[phoneExtension]} | 61,07,12345678,123
 ```
 
-which generates: +1 (123) 456-7890 x123
+Note: when dialing from within Australia, area codes start with a 0, but when dialing from another country, the 0 must be omitted. The example format above handles this by truncating the first number from an Australian two digit area code which generates: 
+`+1 (7) 1234 5678 x123` even though the full "07" is stored in the area code field.
+
+
+**Component Notes**
 
 Each component is surrounded by { }
 
 The names of the component parts are surrounded by [ ]
 
-Two comma separated numbers after the component name are used to get certain parts of the number using php's substr function, allowing for complete flexibility.
+Two optional comma separated numbers after the component name are used to get certain parts of the number using [PHP's substr function](http://php.net/manual/function.substr.php), allowing for complete flexibility.
 
 Anything outside the [ ] or { } is used directly: +,-,(,),x, spaces, etc - whatever every you want to use.
-
-There are lots of complicated rules around numbers changing when dialed from different locations. A simple example is for Australia. When dialing from within Australia, area codes start with a 0, but when dialing from another country, the 0 must be omitted. You can write a simple format to handle this. The following truncates the first number from an Australian two digit area code:
-```
-{+[phoneCountry]} {([phoneAreaCode,1,1])} {[phoneNumber,0,4]} {[phoneNumber,4,4]} {x[phoneExtension]}
-```
-which generates: +1 (7) 1234 5678 x123 even though the full "07" is stored in the area code field.
 
 
 ## Setup
