@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '2.0.6',
+            'version' => '2.0.7',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -31,27 +31,47 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
        );
     }
 
-    protected static $configDefaults = array(
+   /**
+     * Default configuration for module
+     *
+     */
+    static public function getDefaultData() {
+        return array(
+            "example_country" => 1,
+            "example_area_code" => 012,
+            "example_number" => 3456789,
+            "example_extension" => 123,
+            "output_format" => "",
+            "output_format_options" => '
+/*North America*/
+northAmericaStandard | {+[phoneCountry]} {([phoneAreaCode])} {[phoneNumber,0,3]}-{[phoneNumber,3,4]} {x[phoneExtension]}
+northAmericaNoNumberDashes | {+[phoneCountry]} {([phoneAreaCode])} {[phoneNumber]} {x[phoneExtension]}
+northAmericaAllDashes| {+[phoneCountry]}-{[phoneAreaCode]}-{[phoneNumber,0,3]}-{[phoneNumber,3,4]} {x[phoneExtension]}
+northAmericaDashesNoNumberDashes | {+[phoneCountry]}-{[phoneAreaCode]}-{[phoneNumber]} {x[phoneExtension]}
 
-        "example_country" => 1,
-        "example_area_code" => 012,
-        "example_number" => 3456789,
-        "example_extension" => 123,
-        "output_format" => "",
-        "output_format_options" => "northAmericaStandard | {+[phoneCountry] }{([phoneAreaCode]) }{[phoneNumber,0,3]-}{[phoneNumber,3,4]}{ x[phoneExtension]}
-northAmericaNoNumberDashes | {+[phoneCountry] }{([phoneAreaCode]) }{[phoneNumber]}{ x[phoneExtension]}
-northAmericaAllDashes| {+[phoneCountry]-}{[phoneAreaCode]-}{[phoneNumber,0,3]-}{[phoneNumber,3,4]}{ x[phoneExtension]}
-northAmericaDashesNoNumberDashes | {+[phoneCountry]-}{[phoneAreaCode]-}{[phoneNumber]}{ x[phoneExtension]}
-australiaNoCountryAreaCodeLeadingZero | {([phoneAreaCode,0,2]) }{[phoneNumber,0,4] }{[phoneNumber,4,4]}{ x[phoneExtension]}
-australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry] }{([phoneAreaCode,1,1]) }{[phoneNumber,0,4] }{[phoneNumber,4,4]}{ x[phoneExtension]}"
-   );
-
+/*Australia*/
+australiaNoCountryAreaCodeLeadingZero | {([phoneAreaCode,0,2])} {[phoneNumber,0,4]} {[phoneNumber,4,4]} {x[phoneExtension]}
+australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1,1])} {[phoneNumber,0,4]} {[phoneNumber,4,4]} {x[phoneExtension]}'
+        );
+    }
 
     /**
      * Data as used by the get/set functions
      *
      */
     protected $data = array();
+
+    /**
+     * Populate the default config data
+     *
+     */
+    public static $_data;
+
+    public function __construct() {
+        foreach(self::getDefaultData() as $key => $value) {
+            $this->$key = $value;
+        }
+    }
 
     /**
      * Format the value for output, according to selected format and language
@@ -240,7 +260,7 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry] }{([phoneAreaCode,1
 
         $modules->addHookBefore('saveModuleConfigData', null, 'InputfieldPhone_saveModuleConfigData');
 
-        foreach(self::$configDefaults as $key => $value) {
+        foreach(self::getDefaultData() as $key => $value) {
             if(!isset($data[$key]) || $data[$key]=='' || $data[$key]=='~') $data[$key] = $value;
         }
         $this->data = array_map(array($this, 'removeTilde'), $data);
@@ -326,28 +346,27 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry] }{([phoneAreaCode,1
         if(!$phoneNumber) return '';
         if(!strlen($format) || $format == '%s') return ($phoneCountry ? $phoneCountry : null) . ($phoneAreaCode ? $phoneAreaCode : null) . ($phoneNumber ? $phoneNumber : null) . ($phoneExtension ? $phoneExtension : null); // no formatting
 
-        $pattern = preg_match_all("/{(.*?)}/", $format, $components);
+        $pattern = preg_match_all("/{(.*?)}[^{]*/", $format, $components);
 
         $finalvalue = '';
+        foreach ($components[0] as $component) {
 
-        foreach ($components[1] as $component) {
             $prefix = strstr($component, '[', TRUE);
             $suffix = str_replace(']','',strstr($component, ']'));
-
             $component = str_replace(array($prefix, $suffix, '[', ']'), null, $component);
 
             if(strcspn($component, '0123456789') != strlen($component)) {
                     $component_name = strstr($component, ',', TRUE);
                     $char_cutoffs = explode(',',ltrim(str_replace($component_name, '', $component),','));
-                    $value = substr($$component_name, $char_cutoffs[0], $char_cutoffs[1]);
+                    $value = trim(substr($$component_name, $char_cutoffs[0], $char_cutoffs[1]));
             }
             else {
                 $component_name = $component;
                 $value = $$component_name;
             }
-
             $finalvalue .= ($value != '' ? $prefix . $value . $suffix : null);
         }
+        $finalvalue = trim(str_replace(array('{', '}'), null, $finalvalue));
         return $finalvalue;
     }
 
@@ -381,12 +400,6 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry] }{([phoneAreaCode,1
                 return trim($formatParts[1]);
             }
         }
-    }
-
-
-    public function ___install() {
-        // save default config data on install
-        $this->wire('modules')->saveModuleConfigData($this, self::$configDefaults);
     }
 
 }
