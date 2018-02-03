@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '2.0.11',
+            'version' => '2.0.12',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -318,8 +318,15 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
             $formatParts = explode('|', $format);
             $formatName = trim($formatParts[0]);
             $formatCode = trim($formatParts[1]);
-            $exampleNumbers = array_map('trim', explode(',', trim($formatParts[2])));
-            $phoneNumberFormatted = $this->formatPhone($exampleNumbers[0], $exampleNumbers[1], $exampleNumbers[2], $exampleNumbers[3], $formatCode);
+            $defaultExampleNumbers = array(1,221,5673456,123);
+            $exampleNumbers = isset($formatParts[2]) ? array_map('trim', explode(',', trim($formatParts[2]))) : $defaultExampleNumbers;
+            $phoneNumberFormatted = $this->formatPhone(
+                isset($exampleNumbers[0]) ? $exampleNumbers[0] : $defaultExampleNumbers[0],
+                isset($exampleNumbers[1]) ? $exampleNumbers[1] : $defaultExampleNumbers[1],
+                isset($exampleNumbers[2]) ? $exampleNumbers[2] : $defaultExampleNumbers[2],
+                isset($exampleNumbers[3]) ? $exampleNumbers[3] : $defaultExampleNumbers[3],
+                $formatCode
+            );
             $optionsArr[] = array($formatName, $formatName . ' | ' . $phoneNumberFormatted);
         }
         return $optionsArr;
