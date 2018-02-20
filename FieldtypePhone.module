@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '2.0.12',
+            'version' => '2.0.13',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -144,7 +144,7 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
      *
      */
     public function getBlankValue(Page $page, Field $field) {
-        return new Phone();
+        return new Phone($field);
     }
 
     /**
@@ -177,11 +177,13 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
         // get blank phone number (pn)
         $pn = $this->getBlankValue($page, $field);
 
+        $sanitizerType = $field->allow_letters_input ? 'text' : 'digits';
+
         // populate the pn
-        if(isset($value['data'])) $pn->country = $this->wire('sanitizer')->digits($value['data']);
-        if(isset($value['data_area_code'])) $pn->area_code = $this->wire('sanitizer')->digits($value['data_area_code']);
-        if(isset($value['data_number'])) $pn->number = $this->wire('sanitizer')->digits($value['data_number']);
-        if(isset($value['data_extension'])) $pn->extension = $this->wire('sanitizer')->digits($value['data_extension']);
+        if(isset($value['data'])) $pn->country = $this->wire('sanitizer')->$sanitizerType($value['data']);
+        if(isset($value['data_area_code'])) $pn->area_code = $this->wire('sanitizer')->$sanitizerType($value['data_area_code']);
+        if(isset($value['data_number'])) $pn->number = $this->wire('sanitizer')->$sanitizerType($value['data_number']);
+        if(isset($value['data_extension'])) $pn->extension = $this->wire('sanitizer')->$sanitizerType($value['data_extension']);
         if(isset($value['data_output_format'])) $pn->output_format = $this->wire('sanitizer')->text($value['data_output_format']);
 
         return $pn;
@@ -197,11 +199,13 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
         if(!$value instanceof Phone)
             throw new WireException("Expecting an instance of Phone");
 
+        $sanitizerType = $field->allow_letters_input ? 'text' : 'digits';
+
         $sleepValue = array(
-            'data' => $this->wire('sanitizer')->digits($value->country),
-            'data_area_code' => $this->wire('sanitizer')->digits($value->area_code),
-            'data_number' => $this->wire('sanitizer')->digits($value->number),
-            'data_extension' => $this->wire('sanitizer')->digits($value->extension),
+            'data' => $this->wire('sanitizer')->$sanitizerType($value->country),
+            'data_area_code' => $this->wire('sanitizer')->$sanitizerType($value->area_code),
+            'data_number' => $this->wire('sanitizer')->$sanitizerType($value->number),
+            'data_extension' => $this->wire('sanitizer')->$sanitizerType($value->extension),
             'data_output_format' => $this->wire('sanitizer')->text($value->output_format)
        );
 
@@ -289,26 +293,30 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
 
         $pattern = preg_match_all("/{(.*?)}[^{]*/", $format, $components);
 
-        $finalvalue = '';
+        $finalValue = '';
+        $lastSuffix = '';
         foreach ($components[0] as $component) {
 
-            $prefix = strstr($component, '[', TRUE);
+            $prefix = strstr($component, '[', true);
             $suffix = str_replace(']','',strstr($component, ']'));
             $component = str_replace(array($prefix, $suffix, '[', ']'), null, $component);
 
             if(strcspn($component, '0123456789') != strlen($component)) {
-                    $component_name = strstr($component, ',', TRUE);
-                    $char_cutoffs = explode(',',ltrim(str_replace($component_name, '', $component),','));
-                    $value = trim(substr($$component_name, $char_cutoffs[0], $char_cutoffs[1]));
+                $component_name = strstr($component, ',', true);
+                $char_cutoffs = explode(',',ltrim(str_replace($component_name, '', $component),','));
+                $value = trim(substr($$component_name, $char_cutoffs[0], $char_cutoffs[1]));
             }
             else {
                 $component_name = $component;
                 $value = $$component_name;
             }
-            $finalvalue .= ($value != '' ? $prefix . $value . $suffix : null);
+            $finalValue .= ($value != '' ? $prefix . $value . $suffix : null);
+            // if this component has no value, or is not numeric, remove the last suffix
+            if($value == '' || !is_numeric($value)) $finalValue = rtrim($finalValue, $lastSuffix);
+            $lastSuffix = str_replace('}', '', $suffix);
         }
-        $finalvalue = trim(str_replace(array('{', '}'), null, $finalvalue));
-        return $finalvalue;
+        $finalValue = trim(str_replace(array('{', '}'), null, $finalValue));
+        return $finalValue;
     }
 
     public function buildOptions($options, $data) {
@@ -365,7 +373,8 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
  */
 class Phone extends WireData {
 
-    public function __construct() {
+    public function __construct($field) {
+        $this->field = $field;
         $this->set('country', null);
         $this->set('area_code', null);
         $this->set('number', null);
@@ -377,7 +386,7 @@ class Phone extends WireData {
 
         if($key == 'country' || $key == 'area_code' || $key == 'number' || $key == 'extension') {
             // if value isn't numeric set it to blank and throw an exception so it can be seen on API usage
-            if(!is_numeric($value) && !is_null($value) && $value != '') {
+            if(!$this->field->allow_letters_input && !is_numeric($value) && !is_null($value) && $value != '') {
                 $value = $this->$key ? $this->$key : '';
                 throw new WireException("Phone Object only accepts numbers");
             }
