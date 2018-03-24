@@ -127,7 +127,7 @@ class InputfieldPhone extends Inputfield {
             $out .= "</div>";
         }
 
-        $out .= '<div style="clear:both">&nbsp;</div>';
+        $out .= '<div style="clear:both; height:0">&nbsp;</div>';
 
         return $out;
     }
