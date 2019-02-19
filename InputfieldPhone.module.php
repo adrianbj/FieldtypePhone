@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.0.2',
+            'version' => '3.0.3',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon' => 'phone',

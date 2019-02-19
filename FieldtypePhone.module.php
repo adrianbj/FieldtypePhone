@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.0.2',
+            'version' => '3.0.3',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -120,7 +120,17 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
         if($subfield == 'area_code') $subfield = 'data_area_code';
         if($subfield == 'number') $subfield = 'data_number';
         if($subfield == 'extension') $subfield = 'data_extension';
-        return parent::getMatchQuery($query, $table, $subfield, $operator, $value);
+
+		if($this->wire('database')->isOperator($operator)) {
+			// if dealing with something other than address, or operator is native to SQL,
+			// then let Fieldtype::getMatchQuery handle it instead
+			return parent::getMatchQuery($query, $table, $subfield, $operator, $value);
+		}
+		// if we get here, then we're performing either %= (LIKE and variations) or *= (FULLTEXT and variations)
+		$ft = new DatabaseQuerySelectFulltext($query);
+		$ft->match($table, $subfield, $operator, $value);
+		return $query;
+
     }
 
     /**
