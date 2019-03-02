@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.0.3',
+            'version' => '3.1.0',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -39,7 +39,14 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             "output_format" => "",
             "output_format_options" => '
-/*North America*/
+
+/*North America without separate area code*/
+northAmericaStandardNoSeparateAreaCode | {+[phoneCountry]} {([phoneNumber,0,3])} {[phoneNumber,3,3]}-{[phoneNumber,6,4]} {x[phoneExtension]} | 1,,2215673456,123
+northAmericaStandardNoSeparateAreaCodeNoNumberDashes | {+[phoneCountry]} {([phoneNumber,0,3])} {[phoneNumber,3,7]} {x[phoneExtension]} | 1,,2215673456,123
+northAmericaStandardNoSeparateAreaAllDashes | {+[phoneCountry]}-{[phoneNumber,0,3]}-{[phoneNumber,3,3]}-{[phoneNumber,6,4]} {x[phoneExtension]} | 1,,2215673456,123
+northAmericaStandardNoSeparateAreaDashesNoNumberDashes | {+[phoneCountry]}-{[phoneNumber]} {x[phoneExtension]} | 1,,2215673456,123
+
+/*North America with separate area code*/
 northAmericaStandard | {+[phoneCountry]} {([phoneAreaCode])} {[phoneNumber,0,3]}-{[phoneNumber,3,4]} {x[phoneExtension]} | 1,221,5673456,123
 northAmericaNoNumberDashes | {+[phoneCountry]} {([phoneAreaCode])} {[phoneNumber]} {x[phoneExtension]} | 1,221,5673456,123
 northAmericaAllDashes| {+[phoneCountry]}-{[phoneAreaCode]}-{[phoneNumber,0,3]}-{[phoneNumber,3,4]} {x[phoneExtension]} | 1,221,5673456,123

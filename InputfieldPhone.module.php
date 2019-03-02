@@ -19,7 +19,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.0.3',
+            'version' => '3.1.0',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon' => 'phone',
@@ -39,6 +39,7 @@ class InputfieldPhone extends Inputfield {
             "country_input" => 0,
             "country_input_label" => 'Ctry',
             "country_input_width" => 60,
+            "area_code_input" => 0,
             "area_code_input_label" => 'Area',
             "area_code_input_width" => 80,
             "number_input_label" => 'Num',
@@ -101,9 +102,11 @@ class InputfieldPhone extends Inputfield {
             $out .= "</div>";
         }
 
-        $out .= "<div class='phone_col'>";
-        $out .= "<label>".($this->hide_input_labels ? '' : $this->{"area_code_input_label$lang"} . ' ')."<input type='text' pattern='".$pattern."' class='".$this->input_class."' ".($this->placeholder_input_labels ? ' placeholder="'.$this->{"area_code_input_label$lang"}.'"' : '') . ($this->area_code_input_width !== 0 ? ' style="width:'.$this->area_code_input_width.'px"' : '')." name='{$this->name}_area_code' id='Inputfield_{$this->name}_area_code' value='{$value->area_code}'/></label>";
-        $out .= "</div>";
+        if($this->area_code_input) {
+            $out .= "<div class='phone_col'>";
+            $out .= "<label>".($this->hide_input_labels ? '' : $this->{"area_code_input_label$lang"} . ' ')."<input type='text' pattern='".$pattern."' class='".$this->input_class."' ".($this->placeholder_input_labels ? ' placeholder="'.$this->{"area_code_input_label$lang"}.'"' : '') . ($this->area_code_input_width !== 0 ? ' style="width:'.$this->area_code_input_width.'px"' : '')." name='{$this->name}_area_code' id='Inputfield_{$this->name}_area_code' value='{$value->area_code}'/></label>";
+            $out .= "</div>";
+        }
 
         $out .= "<div class='phone_col'>";
         $out .= "<label>".($this->hide_input_labels ? '' : $this->{"number_input_label$lang"} . ' ')."<input type='text' pattern='".$pattern."' class='".$this->input_class."' ".($this->placeholder_input_labels ? ' placeholder="'.$this->{"number_input_label$lang"}.'"' : '') . ($this->number_input_width !== 0 ? ' style="width:'.$this->number_input_width.'px"' : '')."  name='{$this->name}_number' id='Inputfield_{$this->name}_number' value='{$value->number}'/></label>";
@@ -256,13 +259,22 @@ class InputfieldPhone extends Inputfield {
 
 
         // area code
+        $f = $this->wire('modules')->get('InputfieldCheckbox');
+        $f->attr('name', 'area_code_input');
+        $f->label = __('Area Code', __FILE__);
+        $f->description = __('Whether to ask for area code when entering phone numbers.', __FILE__);
+        $f->notes = __('If this is unchecked, then area code and number will be store as one in the number field.', __FILE__);
+        $f->columnWidth = 33;
+        $f->attr('checked', $value->area_code_input ? 'checked' : '');
+        $inputfields->append($f);
+
         $f = $this->wire('modules')->get('InputfieldText');
         $f->attr('name', 'area_code_input_label');
         $f->label = __('Area Code input name', __FILE__);
         $f->attr('size', 100);
         $f->description = __('Name of Area Code input', __FILE__);
         $f->notes = __('Default: Area', __FILE__);
-        $f->columnWidth = 50;
+        $f->columnWidth = 34;
         $f->value = $value->area_code_input_label;
         if($this->wire('languages')) {
             $f->useLanguages = true;
@@ -278,7 +290,7 @@ class InputfieldPhone extends Inputfield {
         $f->attr('size', 10);
         $f->description = __('Width of the input in pixels.', __FILE__);
         $f->notes = __('Default: 80; 0 to not set width', __FILE__);
-        $f->columnWidth = 50;
+        $f->columnWidth = 33;
         $f->value = $value->area_code_input_width;
         $inputfields->append($f);
 
