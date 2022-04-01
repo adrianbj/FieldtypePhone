@@ -22,7 +22,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.1.0',
+            'version' => '3.1.1',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -421,9 +421,8 @@ class Phone extends WireData {
     }
 
     public function __toString() {
-        $number = (string)$this->formattedNumber ? (string)$this->formattedNumber : $this->data['number'];
-        if(!$number) $number = '';
-        return $number;
+        $number = $this->formattedNumber ?: $this->data['number'];
+        return (string)$number;
     }
 
 
