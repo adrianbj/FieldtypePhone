@@ -6,8 +6,7 @@
  *
  * Field that stores 4 numeric values for country/area code/number/extension and allows for multiple formatting options.
  *
- * ProcessWire 3.x
- * Copyright (C) 2010 by Ryan Cramer
+ * Copyright (C) 2022 by Adrian Jones
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
  * http://www.processwire.com
@@ -22,13 +21,13 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.1.1',
+            'version' => '3.1.2',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
             'requiredBy' => 'InputfieldPhone',
             'icon' => 'phone'
-       );
+        );
     }
 
    /**
@@ -90,10 +89,10 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
         $value->formattedNumberNoCtry = $this->formatPhone(null, $value->area_code, $value->number, $value->extension, $outputCode);
         $value->formattedNumberNoExt = $this->formatPhone($value->country, $value->area_code, $value->number, null, $outputCode);
 
-        $value->unformattedNumberNoCtryNoExt = ($value->area_code ? $value->area_code : null) . ($value->number ? $value->number : null);
-        $value->unformattedNumberNoCtry = ($value->area_code ? $value->area_code : null) . ($value->number ? $value->number : null) . ($value->extension ? $value->extension : null);
-        $value->unformattedNumberNoExt = ($value->country ? $value->country : null) . ($value->area_code ? $value->area_code : null) . ($value->number ? $value->number : null);
-        $value->unformattedNumber = $value->unformattedNumberNoExt . ($value->extension ? $value->extension : null);
+        $value->unformattedNumberNoCtryNoExt = ($value->area_code ? $value->area_code : '') . ($value->number ? $value->number : '');
+        $value->unformattedNumberNoCtry = ($value->area_code ? $value->area_code : '') . ($value->number ? $value->number : '') . ($value->extension ? $value->extension : '');
+        $value->unformattedNumberNoExt = ($value->country ? $value->country : '') . ($value->area_code ? $value->area_code : '') . ($value->number ? $value->number : '');
+        $value->unformattedNumber = $value->unformattedNumberNoExt . ($value->extension ? $value->extension : '');
 
         foreach(explode("\n",$this->data["output_format_options"]) as $format) {
             if(trim(preg_replace('!/\*.*?\*/!s', '', $format)) == '') continue;
@@ -128,15 +127,15 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
         if($subfield == 'number') $subfield = 'data_number';
         if($subfield == 'extension') $subfield = 'data_extension';
 
-		if($this->wire('database')->isOperator($operator)) {
-			// if dealing with something other than address, or operator is native to SQL,
-			// then let Fieldtype::getMatchQuery handle it instead
-			return parent::getMatchQuery($query, $table, $subfield, $operator, $value);
-		}
-		// if we get here, then we're performing either %= (LIKE and variations) or *= (FULLTEXT and variations)
-		$ft = new DatabaseQuerySelectFulltext($query);
-		$ft->match($table, $subfield, $operator, $value);
-		return $query;
+        if($this->wire('database')->isOperator($operator)) {
+            // if dealing with something other than address, or operator is native to SQL,
+            // then let Fieldtype::getMatchQuery handle it instead
+            return parent::getMatchQuery($query, $table, $subfield, $operator, $value);
+        }
+        // if we get here, then we're performing either %= (LIKE and variations) or *= (FULLTEXT and variations)
+        $ft = new DatabaseQuerySelectFulltext($query);
+        $ft->match($table, $subfield, $operator, $value);
+        return $query;
 
     }
 
@@ -227,7 +226,7 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
             'data_number' => $this->wire('sanitizer')->$sanitizerType($value->number),
             'data_extension' => $this->wire('sanitizer')->$sanitizerType($value->extension),
             'data_output_format' => $this->wire('sanitizer')->text($value->output_format)
-       );
+        );
 
         return $sleepValue;
     }
@@ -311,7 +310,7 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
     public function formatPhone($phoneCountry, $phoneAreaCode, $phoneNumber, $phoneExtension, $format) {
 
         if(!$phoneNumber) return '';
-        if(!strlen($format) || $format == '%s') return ($phoneCountry ? $phoneCountry : null) . ($phoneAreaCode ? $phoneAreaCode : null) . ($phoneNumber ? $phoneNumber : null) . ($phoneExtension ? $phoneExtension : null); // no formatting
+        if(!strlen($format) || $format == '%s') return ($phoneCountry ? $phoneCountry : '') . ($phoneAreaCode ? $phoneAreaCode : '') . ($phoneNumber ? $phoneNumber : '') . ($phoneExtension ? $phoneExtension : ''); // no formatting
 
         $pattern = preg_match_all("/{(.*?)}[^{]*/", $format, $components);
 
@@ -321,7 +320,7 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
 
             $prefix = strstr($component, '[', true);
             $suffix = str_replace(']','',strstr($component, ']'));
-            $component = str_replace(array($prefix, $suffix, '[', ']'), null, $component);
+            $component = str_replace(array($prefix, $suffix, '[', ']'), '', $component);
 
             if(strcspn($component, '0123456789') != strlen($component)) {
                 $component_name = strstr($component, ',', true);
@@ -332,12 +331,12 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
                 $component_name = $component;
                 $value = $$component_name;
             }
-            $finalValue .= ($value != '' ? $prefix . $value . $suffix : null);
+            $finalValue .= ($value != '' ? $prefix . $value . $suffix : '');
             // if this component has no value, or is not numeric, remove the last suffix
             if($value == '' || !is_numeric($value)) $finalValue = rtrim($finalValue, $lastSuffix);
             $lastSuffix = str_replace('}', '', $suffix);
         }
-        $finalValue = trim(str_replace(array('{', '}'), null, $finalValue));
+        $finalValue = trim(str_replace(array('{', '}'), '', $finalValue));
         return $finalValue;
     }
 
@@ -424,6 +423,5 @@ class Phone extends WireData {
         $number = $this->formattedNumber ?: $this->data['number'];
         return (string)$number;
     }
-
 
 }
