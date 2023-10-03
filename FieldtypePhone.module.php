@@ -9,9 +9,6 @@
  * Copyright (C) 2022 by Adrian Jones
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
- * http://www.processwire.com
- * http://www.ryancramer.com
- *
  */
 
 class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
@@ -21,7 +18,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.1.2',
+            'version' => '3.1.3',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -163,6 +160,21 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
     public function getBlankValue(Page $page, Field $field) {
         return new Phone($field);
     }
+
+	/**
+	 * Is given value one that should cause the DB row(s) to be deleted rather than saved?
+	 *
+	 * Used by ProcessWire 3.0.150+
+	 *
+	 * @param Page $page
+	 * @param Field $field
+	 * @param mixed $value
+	 * @return bool
+	 *
+	 */
+	public function isDeleteValue(Page $page, Field $field, $value) {
+	    return strlen("$value") === 0;
+	}
 
     /**
      * Any value will get sanitized before setting it to a page object

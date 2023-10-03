@@ -7,9 +7,6 @@
  * Copyright (C) 2022 by Adrian Jones
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
- * http://www.processwire.com
- * http://www.ryancramer.com
- *
  */
 
 class InputfieldPhone extends Inputfield {
@@ -18,7 +15,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.1.2',
+            'version' => '3.1.3',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon' => 'phone',
