@@ -6,7 +6,7 @@
  *
  * Field that stores 4 numeric values for country/area code/number/extension and allows for multiple formatting options.
  *
- * Copyright (C) 2022 by Adrian Jones
+ * Copyright (C) 2023 by Adrian Jones
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
  */
@@ -18,7 +18,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.1.3',
+            'version' => '3.1.4',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -173,7 +173,12 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
 	 *
 	 */
 	public function isDeleteValue(Page $page, Field $field, $value) {
-	    return strlen("$value") === 0;
+	    if(!$value['country'] && !$value['area_code'] && !$value['number'] && !$value['extension']) {
+            return true;
+        }
+        else {
+            return false;
+        }
 	}
 
     /**
@@ -408,6 +413,7 @@ class Phone extends WireData {
 
     public function __construct($field = null) {
         $this->field = $field;
+        $this->set('raw', null);
         $this->set('country', null);
         $this->set('area_code', null);
         $this->set('number', null);
@@ -432,7 +438,7 @@ class Phone extends WireData {
     }
 
     public function __toString() {
-        $number = $this->formattedNumber ?: $this->data['number'];
+        $number = $this->formattedNumber ?: ($this->data['raw'] ?: '');
         return (string)$number;
     }
 
