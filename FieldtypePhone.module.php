@@ -6,7 +6,7 @@
  *
  * Field that stores 4 numeric values for country/area code/number/extension and allows for multiple formatting options.
  *
- * Copyright (C) 2023 by Adrian Jones
+ * Copyright (C) 2024 by Adrian Jones
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
  */
@@ -18,7 +18,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.1.4',
+            'version' => '3.1.5',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -295,9 +295,11 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
         $f->description = __("Select the default format to be used when outputting phone numbers.\n\nYou can define new formats for this dropdown select in the 'Phone Output Format Options' field below.", __FILE__);
         $f->notes = __("This can be overridden on the Input tab of each 'phone' field.", __FILE__);
         $f->addOption('', __('None', __FILE__));
-        foreach($this->buildOptions(explode("\n",$this->data["output_format_options"]), $this->data) as $option) {
-            $f->addOption($option[0], $option[1]);
-            if($this->data["output_format"] == $option[0]) $f->attr('value', $option[0]);
+        if($this->data["output_format_options"]) {
+            foreach($this->buildOptions(explode("\n", $this->data["output_format_options"])) as $option) {
+                $f->addOption($option[0], $option[1]);
+                if($this->data["output_format"] == $option[0]) $f->attr('value', $option[0]);
+            }
         }
         $inputfields->add($f);
 
@@ -327,7 +329,7 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
     public function formatPhone($phoneCountry, $phoneAreaCode, $phoneNumber, $phoneExtension, $format) {
 
         if(!$phoneNumber) return '';
-        if(!strlen($format) || $format == '%s') return ($phoneCountry ? $phoneCountry : '') . ($phoneAreaCode ? $phoneAreaCode : '') . ($phoneNumber ? $phoneNumber : '') . ($phoneExtension ? $phoneExtension : ''); // no formatting
+        if(!$format || !strlen($format) || $format == '%s') return ($phoneCountry ? $phoneCountry : '') . ($phoneAreaCode ? $phoneAreaCode : '') . ($phoneNumber ? $phoneNumber : '') . ($phoneExtension ? $phoneExtension : ''); // no formatting
 
         $pattern = preg_match_all("/{(.*?)}[^{]*/", $format, $components);
 
@@ -342,7 +344,7 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
             if(strcspn($component, '0123456789') != strlen($component)) {
                 $component_name = strstr($component, ',', true);
                 $char_cutoffs = explode(',',ltrim(str_replace($component_name, '', $component),','));
-                $value = trim(substr($$component_name, $char_cutoffs[0], $char_cutoffs[1]));
+                $value = ($$component_name == '' ? '' : trim(substr($$component_name, $char_cutoffs[0], $char_cutoffs[1])));
             }
             else {
                 $component_name = $component;
@@ -357,7 +359,7 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
         return $finalValue;
     }
 
-    public function buildOptions($options, $data) {
+    public function buildOptions($options) {
         $optionsArr = array();
         foreach($options as $format) {
             if(trim(preg_replace('!/\*.*?\*/!s', '', $format)) == '') continue;

@@ -4,7 +4,7 @@
  * ProcessWire Phone Inputfieldtype
  * by Adrian Jones with code from "Soma" Philipp Urlich's Dimensions Fieldtype module and Ryan's core FieldtypeDatetime module
  *
- * Copyright (C) 2023 by Adrian Jones
+ * Copyright (C) 2024 by Adrian Jones
  * Licensed under GNU/GPL v2, see LICENSE.TXT
  *
  */
@@ -15,7 +15,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.1.4',
+            'version' => '3.1.5',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon' => 'phone',
@@ -119,7 +119,7 @@ class InputfieldPhone extends Inputfield {
             $out .= "<label>".($this->hide_input_labels ? '' : "{$this->_('Format')} ")."<select name='{$this->name}_output_format' id='Inputfield_{$this->name}_output_format'>";
             $out .= '<option value="" ' . ($this->output_format == '' ? 'selected' : '') . '>No Override</option>';
             $this->fieldtypePhone = $this->wire('modules')->get('FieldtypePhone');
-            foreach($this->fieldtypePhone->buildOptions(explode("\n",$this->output_format_options), $this->data) as $option) {
+            foreach($this->fieldtypePhone->buildOptions(explode("\n",$this->output_format_options)) as $option) {
                 $out .= '<option value="'.$option[0].'" ' . (($option[0] == $value->output_format) ? 'selected' : '') . '>'.$option[1].'</option>';
             }
             $out .= "</select></label>";
@@ -358,9 +358,11 @@ class InputfieldPhone extends Inputfield {
         $f->description = __("Select the format to be used when outputting phone numbers for this field.\n\nYou can define new formats for this dropdown select in the phone fieldtype module config settings.", __FILE__);
         $f->columnWidth = 66;
         $f->addOption('', __('None', __FILE__));
-        foreach($this->fieldtypePhone->buildOptions(explode("\n", $this->fieldtypePhone->output_format_options), $this->data) as $option) {
-            $f->addOption($option[0], $option[1]);
-            if($value->output_format == $option[0]) $f->attr('value', $option[0]);
+        if($this->fieldtypePhone->output_format_options) {
+            foreach($this->fieldtypePhone->buildOptions(explode("\n", $this->fieldtypePhone->output_format_options)) as $option) {
+                $f->addOption($option[0], $option[1]);
+                if($value->output_format == $option[0]) $f->attr('value', $option[0]);
+            }
         }
         $inputfields->append($f);
 
