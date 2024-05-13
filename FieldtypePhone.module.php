@@ -18,7 +18,7 @@ class FieldtypePhone extends Fieldtype implements Module, ConfigurableModule {
         return array(
             'title' => __('Phone', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.1.5',
+            'version' => '3.1.6',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'installs' => 'InputfieldPhone',
@@ -413,14 +413,14 @@ australiaWithCountryAreaCodeNoLeadingZero | {+[phoneCountry]} {([phoneAreaCode,1
  */
 class Phone extends WireData {
 
-    public function __construct($field = null) {
+    public function __construct($field = '') {
         $this->field = $field;
-        $this->set('raw', null);
-        $this->set('country', null);
-        $this->set('area_code', null);
-        $this->set('number', null);
-        $this->set('extension', null);
-        $this->set('output_format', null);
+        $this->set('raw', '');
+        $this->set('country', '');
+        $this->set('area_code', '');
+        $this->set('number', '');
+        $this->set('extension', '');
+        $this->set('output_format', '');
     }
 
     public function set($key, $value) {

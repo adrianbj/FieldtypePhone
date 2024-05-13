@@ -15,7 +15,7 @@ class InputfieldPhone extends Inputfield {
         return array(
             'title' => __('Phone Inputfield', __FILE__),
             'summary' => __('Multi part phone field, with custom output formatting options.', __FILE__),
-            'version' => '3.1.5',
+            'version' => '3.1.6',
             'author' => 'Adrian Jones',
             'href' => 'http://modules.processwire.com/modules/fieldtype-phone/',
             'icon' => 'phone',
@@ -163,19 +163,22 @@ class InputfieldPhone extends Inputfield {
                         // in case the input isn't numeric show an error
                         $this->wire()->error($this->_("Field only accepts numeric values"));
                     }
-                    elseif($key == 'output_format' || $this->allow_letters_input) {
-                        $value->set($key, $this->wire('sanitizer')->text($input->$name));
-                    }
                     else {
-                        $value->set($key, $this->wire('sanitizer')->digits($input->$name));
+                        if($key == 'output_format' || $this->allow_letters_input) {
+                            $value->set($key, $this->wire('sanitizer')->text($input->$name));
+                        }
+                        else {
+                            $value->set($key, $this->wire('sanitizer')->digits($input->$name));
+                        }
+                        $this->trackChange('value');
                     }
                 }
             }
         }
+        $value->set('raw', $value->country . $value->area_code . $value->number . $value->extension);
 
         if($value != $this->attr('value')) {
-            $this->trackChange('value');
-            // sets formatted value which is needed for Form Builder entries table
+            // sets formatted value which is needed for FormBuilder entries table
             $this->setAttribute('value', $this->fieldtypePhone->formatPhone($value->country, $value->area_code, $value->number, $value->extension, $this->fieldtypePhone->getFormatFromName($value->output_format ?: $this->output_format)));
         }
         return $this;
